@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block main_content %}
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card stats-card text-white">
+            <div class="card-body">
+                <h5><i class="fas fa-clipboard-list me-2"></i>{{ stats.total_prompts }}</h5>
+                <p class="mb-0">Total Prompts</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card stats-card text-white">
+            <div class="card-body">
+                <h5><i class="fas fa-folder me-2"></i>{{ stats.categories }}</h5>
+                <p class="mb-0">Categories</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card stats-card text-white">
+            <div class="card-body">
+                <h5><i class="fas fa-star me-2"></i>{{ stats.favorites }}</h5>
+                <p class="mb-0">Favorites</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-clock me-2"></i>Recent Prompts</h5>
+            </div>
+            <div class="card-body">
+                {% for prompt in recent %}
+                <div class="mb-3 p-2 border rounded prompt-card">
+                    <h6>
+                        <a href="/prompt/{{ prompt.id }}" class="text-decoration-none">
+                            {{ prompt.title }}
+                        </a>
+                        {% if prompt.favorite %}
+                        <i class="fas fa-star text-warning ms-2"></i>
+                        {% endif %}
+                    </h6>
+                    <p class="text-muted small mb-1">{{ prompt.content[:100] }}...</p>
+                    <div>
+                        <span class="badge bg-primary category-badge">{{ prompt.category }}</span>
+                        <small class="text-muted ms-2">Used {{ prompt.use_count }} times</small>
+                    </div>
+                </div>
+                {% else %}
+                <p class="text-muted">No recent prompts found. Start using some prompts!</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-star me-2"></i>Favorites</h5>
+            </div>
+            <div class="card-body">
+                {% for prompt in favorites %}
+                <div class="mb-3 p-2 border rounded prompt-card">
+                    <h6>
+                        <a href="/prompt/{{ prompt.id }}" class="text-decoration-none">
+                            {{ prompt.title }}
+                        </a>
+                        <i class="fas fa-star text-warning ms-2"></i>
+                    </h6>
+                    <p class="text-muted small mb-1">{{ prompt.content[:100] }}...</p>
+                    <div>
+                        <span class="badge bg-primary category-badge">{{ prompt.category }}</span>
+                        {% for tag in prompt.tags %}
+                        <span class="badge bg-secondary category-badge ms-1">{{ tag }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% else %}
+                <p class="text-muted">No favorites yet. Star some prompts to see them here!</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block page_title %}{{ prompt.title }} - Cognitrix{% endblock %}
+
+{% block main_content %}
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h4>
+            {{ prompt.title }}
+            {% if prompt.favorite %}
+            <i class="fas fa-star text-warning ms-2"></i>
+            {% endif %}
+        </h4>
+        <div>
+            <button class="btn btn-primary btn-sm" onclick="copyToClipboard()">
+                <i class="fas fa-copy me-1"></i>Copy
+            </button>
+            <button class="btn btn-success btn-sm" onclick="testWithOllama()" disabled>
+                <i class="fas fa-robot me-1"></i>Test (Phase 2)
+            </button>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="row mb-3">
+            <div class="col-md-8">
+                <span class="badge bg-primary me-2">{{ prompt.category }}</span>
+                {% for tag in prompt.tags %}
+                <span class="badge bg-secondary me-1">{{ tag }}</span>
+                {% endfor %}
+            </div>
+            <div class="col-md-4 text-end">
+                <small class="text-muted">Used {{ prompt.use_count }} times</small>
+            </div>
+        </div>
+        
+        {% if prompt.variables %}
+        <div class="alert alert-info">
+            <h6><i class="fas fa-edit me-2"></i>Variables</h6>
+            <form id="variableForm">
+                {% for var in prompt.variables %}
+                <div class="mb-2">
+                    <label class="form-label">{{ var.replace('_', ' ').title() }}</label>
+                    <input type="text" class="form-control" name="{{ var }}" placeholder="Enter {{ var }}">
+                </div>
+                {% endfor %}
+                <button type="button" class="btn btn-sm btn-outline-primary" onclick="substituteVariables()">
+                    <i class="fas fa-magic me-1"></i>Substitute
+                </button>
+            </form>
+        </div>
+        {% endif %}
+        
+        <div class="card">
+            <div class="card-header">
+                <h6>Prompt Content</h6>
+            </div>
+            <div class="card-body">
+                <pre id="promptContent" style="white-space: pre-wrap; font-family: inherit;">{{ prompt.content }}</pre>
+            </div>
+        </div>
+        
+        <div class="row mt-3">
+            <div class="col-md-6">
+                <small class="text-muted">
+                    <i class="fas fa-calendar me-1"></i>Created: {{ prompt.created }}
+                </small>
+            </div>
+            <div class="col-md-6 text-end">
+                <small class="text-muted">
+                    <i class="fas fa-clock me-1"></i>Last used: {{ prompt.get('last_used', 'Never') }}
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const originalPrompt = `{{ prompt.content }}`;
+
+function copyToClipboard() {
+    const content = document.getElementById('promptContent').textContent;
+    navigator.clipboard.writeText(content).then(() => {
+        const btn = event.target.closest('button');
+        const original = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-check me-1"></i>Copied!';
+        btn.classList.replace('btn-primary', 'btn-success');
+        
+        setTimeout(() => {
+            btn.innerHTML = original;
+            btn.classList.replace('btn-success', 'btn-primary');
+        }, 2000);
+    });
+}
+
+function substituteVariables() {
+    const form = document.getElementById('variableForm');
+    const formData = new FormData(form);
+    let content = originalPrompt;
+    
+    for (let [key, value] of formData.entries()) {
+        if (value.trim()) {
+            content = content.replace(new RegExp(`{${key}}`, 'g'), value);
+        }
+    }
+    
+    document.getElementById('promptContent').textContent = content;
+}
+
+function testWithOllama() {
+    alert('Ollama integration coming in Phase 2!');
+}
+</script>
+{% endblock %}

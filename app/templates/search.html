@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block page_title %}Search Results - Cognitrix{% endblock %}
+
+{% block main_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>
+        <i class="fas fa-search me-2"></i>Search Results
+        {% if query %}
+        <small class="text-muted">for "{{ query }}"</small>
+        {% endif %}
+    </h2>
+    <span class="badge bg-primary fs-6">{{ results|length }} results</span>
+</div>
+
+{% if query and results|length == 0 %}
+<div class="alert alert-info">
+    <i class="fas fa-info-circle me-2"></i>
+    No prompts found for "{{ query }}". Try different keywords or browse categories.
+</div>
+{% endif %}
+
+{% if results %}
+<div class="row">
+    {% for prompt in results %}
+    <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card h-100 prompt-card">
+            <div class="card-body">
+                <h6 class="card-title">
+                    <a href="/prompt/{{ prompt.id }}" class="text-decoration-none">
+                        {{ prompt.title }}
+                    </a>
+                    {% if prompt.favorite %}
+                    <i class="fas fa-star text-warning ms-2"></i>
+                    {% endif %}
+                </h6>
+                <p class="card-text text-muted small">
+                    {{ prompt.content[:150] }}{% if prompt.content|length > 150 %}...{% endif %}
+                </p>
+                <div class="mb-2">
+                    <span class="badge bg-primary category-badge">{{ prompt.category }}</span>
+                    {% for tag in prompt.tags[:3] %}
+                    <span class="badge bg-secondary category-badge ms-1">{{ tag }}</span>
+                    {% endfor %}
+                    {% if prompt.tags|length > 3 %}
+                    <span class="badge bg-light text-dark category-badge ms-1">+{{ prompt.tags|length - 3 }}</span>
+                    {% endif %}
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <small class="text-muted">
+                        {% if prompt.search_score %}
+                        <i class="fas fa-chart-line me-1"></i>Score: {{ prompt.search_score }}
+                        {% endif %}
+                    </small>
+                    <small class="text-muted">Used {{ prompt.use_count }} times</small>
+                </div>
+            </div>
+            <div class="card-footer bg-transparent">
+                <button class="btn btn-sm btn-outline-primary" onclick="quickCopy(this, '{{ prompt.content|replace("'", "\\'") }}')">
+                    <i class="fas fa-copy me-1"></i>Quick Copy
+                </button>
+                <a href="/prompt/{{ prompt.id }}" class="btn btn-sm btn-primary ms-2">
+                    <i class="fas fa-eye me-1"></i>View
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<script>
+function quickCopy(buttonElement, content) {
+    navigator.clipboard.writeText(content).then(() => {
+        const original = buttonElement.innerHTML;
+        buttonElement.innerHTML = '<i class="fas fa-check me-1"></i>Copied!';
+        buttonElement.classList.replace('btn-outline-primary', 'btn-success');
+        
+        setTimeout(() => {
+            buttonElement.innerHTML = original;
+            buttonElement.classList.replace('btn-success', 'btn-outline-primary');
+        }, 2000);
+    });
+}
+</script>
+{% endblock %}
