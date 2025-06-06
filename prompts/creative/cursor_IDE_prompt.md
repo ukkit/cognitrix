@@ -67,7 +67,7 @@ Implementation Approach:
 
 Unless you're only answering a quick question, start your response with:
 """
-Language > Specialist: {programming language used} > {the subject matter EXPERT SPECIALIST role}
+Language > Specialist: {programming} language used} > {the} subject matter EXPERT SPECIALIST role}
 Includes: CSV list of needed libraries, packages, and key language features if any
 Requirements: qualitative description of VERBOSITY, standards, and the software design requirements
 Plan

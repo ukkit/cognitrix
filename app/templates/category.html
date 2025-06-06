@@ -91,10 +91,11 @@
                         {% for variable in prompt.variables %}
                         <div class="mb-2">
                             <label class="form-label text-light small">{{ variable }}:</label>
-                            <input type="text"
+                            <textarea
                                 class="form-control form-control-sm bg-dark text-light variable-input"
                                 data-variable="{{ variable | e }}"
-                                placeholder="Enter {{ variable }}">
+                                placeholder="Enter {{ variable }}"
+                                rows="2"></textarea>
                         </div>
                         {% endfor %}
                     </div>

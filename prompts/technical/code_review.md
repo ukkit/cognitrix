@@ -21,7 +21,7 @@ variables:
 ---
 You are an expert {language} code reviewer. Please review this code:
 
-{code_snippet}
+{code}_snippet}
 
 Focus on:
 - Code quality and best practices

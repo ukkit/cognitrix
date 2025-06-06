@@ -32,7 +32,7 @@
                 <small class="text-muted">Used {{ prompt.use_count }} times</small>
             </div>
         </div>
-        
+
         {% if prompt.variables %}
         <div class="alert alert-info">
             <h6><i class="fas fa-edit me-2"></i>Variables</h6>
@@ -40,7 +40,11 @@
                 {% for var in prompt.variables %}
                 <div class="mb-2">
                     <label class="form-label">{{ var.replace('_', ' ').title() }}</label>
-                    <input type="text" class="form-control" name="{{ var }}" placeholder="Enter {{ var }}">
+                    <textarea
+                        class="form-control form-control-sm bg-dark text-light variable-input"
+                        data-variable="{{ variable | e }}"
+                        placeholder="Enter {{ variable }}"
+                        rows="2"></textarea>
                 </div>
                 {% endfor %}
                 <button type="button" class="btn btn-sm btn-outline-primary" onclick="substituteVariables()">
@@ -49,7 +53,7 @@
             </form>
         </div>
         {% endif %}
-        
+
         <div class="card">
             <div class="card-header">
                 <h6>Prompt Content</h6>
@@ -58,7 +62,7 @@
                 <pre id="promptContent" style="white-space: pre-wrap; font-family: inherit;">{{ prompt.content }}</pre>
             </div>
         </div>
-        
+
         <div class="row mt-3">
             <div class="col-md-6">
                 <small class="text-muted">
@@ -84,7 +88,7 @@ function copyToClipboard() {
         const original = btn.innerHTML;
         btn.innerHTML = '<i class="fas fa-check me-1"></i>Copied!';
         btn.classList.replace('btn-primary', 'btn-success');
-        
+
         setTimeout(() => {
             btn.innerHTML = original;
             btn.classList.replace('btn-success', 'btn-primary');
@@ -96,13 +100,13 @@ function substituteVariables() {
     const form = document.getElementById('variableForm');
     const formData = new FormData(form);
     let content = originalPrompt;
-    
+
     for (let [key, value] of formData.entries()) {
         if (value.trim()) {
             content = content.replace(new RegExp(`{${key}}`, 'g'), value);
         }
     }
-    
+
     document.getElementById('promptContent').textContent = content;
 }
 

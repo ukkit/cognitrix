@@ -48,7 +48,7 @@ class Circle:
 
 def print_circle_properties(circles):
     for circle in circles:
-        print(f"Circle with radius {circle.radius}:")
+        print(f"Circle with radius {circle}}}}}.radius}:")
         print(f"Area: {circle.area()}")
         print(f"Perimeter: {circle.perimeter()}\n")
 

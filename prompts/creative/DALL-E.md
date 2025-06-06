@@ -23,7 +23,7 @@ last_used: null
 Must only use 350 characters, write without word wraps and headlines, without connection words, back to back separated with commas:
 
 [1], [2], [3] {night}, [4], [5], [6],  
-{camera settings}
+{camera} settings}
 
 replace [1] with the subject: " " replace [2] with a list of creative detailed descriptions about [1]  
 replace [3] with a list of detailed descriptions about the environment of the  

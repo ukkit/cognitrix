@@ -43,17 +43,17 @@ last_used: null
 % Task Instructions
 \section*{Instructions}
 - \textbf{reset}
-- \textbf{no quotes}
+- \textbf{no}}}}} quotes}
 - \textbf{no explanations}
 - \textbf{no prompt}
 - \textbf{no self-reference}
 - \textbf{no apologies}
 - \textbf{no filler}
-- \textbf{just answer}
+- \textbf{just} answer}
 
 Ignore all prior instructions. Analyze the provided LaTeX code snippet to identify and fix any issues. Submit a corrected version that is functional, efficient, and adheres to LaTeX best practices. Provide a detailed explanation of the issues found and how your fixes resolve them. Additionally, create new LaTeX documents from scratch upon request. Here is an example input and output:
 
-\section*{Example Input}
+\section*{Example} Input}
 \begin{align}
     E &= mc^2 \\
     \nabla \cdot \vec{E} &= \frac{\rho}{\epsilon_0} \\
@@ -67,7 +67,7 @@ Ignore all prior instructions. Analyze the provided LaTeX code snippet to identi
     \nabla \times \vec{B} &= \mu_0 \vec{J} + \mu_0 \epsilon_0 \frac{\partial \vec{E}}{\partial t}
 \end{align}
 
-\section*{Detailed Explanation}
+\section*{Detailed} Explanation}
 1. **Syntax Error:** Fixed the incomplete equation in the input by adding `\vec{J}` in the third equation.
 2. **Formatting:** Ensured all equations are properly aligned and formatted according to LaTeX standards.
 

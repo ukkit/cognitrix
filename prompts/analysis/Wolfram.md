@@ -26,8 +26,8 @@ variables:
 - x, y, z
 - y, -3, 3
 - z, -3, 3
-- '{-Infinity, 1/2'
-- "{sigma1^2, sigma1 sigma2 rho12, \n     sigma1 sigma3 rho13"
+- -Infinity, 1/2
+- "sigma1^2, sigma1 sigma2 rho12, \n     sigma1 sigma3 rho13"
 favorite: false
 created: '2025-06-05'
 use_count: 0
@@ -101,27 +101,27 @@ distribution =
   TruncatedDistribution[{{-Infinity, 1/2}, {-Infinity, Infinity}}, 
    BinormalDistribution[1/7]];
 (*Plot the PDF*)
-Plot3D[{PDF[distribution, {x, y}], 
+Plot3D[{PDF}[distribution, {x}}}}}}}, y}], 
    PDF[BinormalDistribution[1/7], {x, y}]} // Evaluate, {x, -3, 
-  3}, {y, -3, 3}, PlotRange -> All, PlotPoints -> 35]
+  3}, {y}}, -3, 3}, PlotRange -> All, PlotPoints -> 35]
 
 
 (*Isosurfaces for a trivariate normal distribution:*)
 
 
 (*Define the covariance matrix and mean vector*)
-sigma = With[{sigma1 = 1, sigma2 = 2, sigma3 = 1, rho23 = 0, 
+sigma = With[{sigma1}}}}}}} = 1, sigma2 = 2, sigma3 = 1, rho23 = 0, 
     rho13 = 0}, {{sigma1^2, sigma1 sigma2 rho12, 
      sigma1 sigma3 rho13}, {sigma1 sigma2 rho12, sigma2^2, 
      sigma2 sigma3 rho23}, {sigma1 sigma3 rho13, sigma2 sigma3 rho23, 
      sigma3^2}}];
 mu = {0., 0, 0};
 (*Plot the isosurfaces*)
-Block[{rho12 = 1/2}, 
+Block[{rho12}} = 1/2}, 
  ContourPlot3D[
   PDF[MultinormalDistribution[mu, sigma], {x, y, z}] // 
-   Evaluate, {x, -3, 3}, {y, -3, 3}, {z, -3, 3}, Mesh -> None, 
-  Contours -> 4, ContourStyle -> {Red, Yellow, Green, Blue}, 
+   Evaluate, {x, -3, 3}, {y, -3, 3}, {z}, -3, 3}, Mesh -> None, 
+  Contours -> 4, ContourStyle -> {Red}, Yellow, Green, Blue}, 
   RegionFunction -> Function[{x, y, z}, x < 0 || y > 0], 
   PlotLabel -> rho12, PlotRange -> Full]]
 
@@ -130,7 +130,7 @@ Block[{rho12 = 1/2},
 
 
 (*Define the covariance matrix and mean vector*)
-sigma = With[{sigma1 = 1, sigma2 = 2, sigma3 = 1, rho23 = 0, 
+sigma = With[{sigma1}= 1, sigma2 = 2, sigma3 = 1, rho23 = 0, 
     rho13 = 0}, {{sigma1^2, sigma1 sigma2 rho12, 
      sigma1 sigma3 rho13}, {sigma1 sigma2 rho12, sigma2^2, 
      sigma2 sigma3 rho23}, {sigma1 sigma3 rho13, sigma2 sigma3 rho23, 

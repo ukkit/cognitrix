@@ -7,7 +7,7 @@ tags:
 - tutorial
 - planning
 variables:
-- '{text'
+- text
 favorite: false
 created: '2025-06-05'
 use_count: 0

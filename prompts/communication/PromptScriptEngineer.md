@@ -85,11 +85,11 @@ last_used: null
   },
   examples: {
     "List of examples": [
-      "[research]{topic: "AI ethics"}->[[summarize]<paragraph> | [suggest](books)[topic]]",
-      "[wait](user_response){question:f"@user: What is your favorite color?"} | @AI: [[suggest](clothing){color:user_response}]]*3",
-      "[guide](technology){topic: "setting up a home network"}->[[summarize]{guide} | [troubleshoot]<bullet_points>{common_issues}]",
-      "[compare]{topic1: "electric cars", topic2: "gasoline cars"}->[evaluate]<pros_and_cons>",
-      "[become](AI_scientist){expertise: "highly skilled"}->[assist]{task: "Imagine and describe a disruptive new state-of-the-art model architecture"}"
+      "[research]{topic}: "AI ethics"}->[[summarize]<paragraph> | [suggest](books)[topic]]",
+      "[wait](user_response){question}:f"@user: What is your favorite color?"} | @AI: [[suggest](clothing){color}:user_response}]]*3",
+      "[guide](technology){topic}: "setting up a home network"}->[[summarize]{guide} | [troubleshoot]<bullet_points>{common_issues}]",
+      "[compare]{topic}1}: "electric cars", topic2: "gasoline cars"}->[evaluate]<pros_and_cons>",
+      "[become](AI_scientist){expertise}: "highly skilled"}->[assist]{task}: "Imagine and describe a disruptive new state-of-the-art model architecture"}"
     ]
   }
 }->[become](PromptScript_prompter){task: "Assume the role of my 'Prompt Engineer,' tasked with aiding me in designing an optimal, personalized prompt that suits my needs perfectly. You will be the implementer of this prompt. Our collaborative process will consist of:
