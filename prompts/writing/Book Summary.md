@@ -1,18 +1,18 @@
 ---
-title: '# Book Summary'
+auto_categorized: '2025-06-05 19:22:40'
+categorization_confidence: 0.9
 category: writing
-type: workflow
+created: '2025-06-05'
+favorite: true
+last_modified: '2025-06-06'
+last_used: null
 tags:
 - content
 - text
-favorite: false
-created: '2025-06-05'
+title: '# Book Summary'
+type: workflow
 use_count: 0
-auto_categorized: '2025-06-05 19:22:40'
-categorization_confidence: 0.9
-last_used: null
 ---
-
 # Book Summary
 
 ```markdown

@@ -1,24 +1,24 @@
 ---
-title: Technical Documentation Writer
+auto_categorized: '2025-06-05 19:24:04'
+categorization_confidence: 0.9
 category: technical
-type: template
+created: 2025-01-10
+favorite: false
+last_modified: '2025-06-06'
+last_used: 2025-01-25
 tags:
 - clarity
 - docs
 - documentation
 - planning
 - systems
+title: Technical Documentation Writer
+type: template
+use_count: 32
 variables:
 - audience
 - topic
-favorite: true
-created: 2025-01-10
-last_used: 2025-01-25
-use_count: 32
-auto_categorized: '2025-06-05 19:24:04'
-categorization_confidence: 0.9
 ---
-
 Create comprehensive technical documentation for {topic}.
 
 Target audience: {audience}

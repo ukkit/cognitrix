@@ -1,24 +1,24 @@
 ---
-title: Code Review Assistant
+auto_categorized: '2025-06-05 19:21:32'
+categorization_confidence: 0.9
 category: technical
-type: template
+created: 2025-01-15
+favorite: true
+last_modified: '2025-06-06'
+last_used: 2025-01-20
 tags:
 - best-practices
 - documentation
 - python
 - review
 - systems
+title: Code Review Assistant
+type: template
+use_count: 15
 variables:
 - code_snippet
 - language
-favorite: false
-created: 2025-01-15
-last_used: 2025-01-20
-use_count: 15
-auto_categorized: '2025-06-05 19:21:32'
-categorization_confidence: 0.9
 ---
-
 You are an expert {language} code reviewer. Please review this code:
 
 {code_snippet}

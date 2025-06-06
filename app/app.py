@@ -509,7 +509,7 @@ def copy_prompt():
 
 @app.route('/api/toggle-favorite', methods=['POST'])
 def toggle_favorite():
-    """Toggle favorite status of a prompt"""
+    """Toggle favorite status of a prompt - FIXED VERSION"""
     try:
         data = request.get_json()
         prompt_id = data.get('prompt_id')
@@ -517,27 +517,21 @@ def toggle_favorite():
         if not prompt_id:
             return jsonify({'error': 'Missing prompt_id'}), 400
 
-        # Use centralized finder
+        print(f"Toggling favorite for prompt_id: {prompt_id}")  # Debug logging
+
+        # Use the centralized finder function
         prompt_file = find_prompt_file(prompt_id)
-        if not prompt_file:
-            return jsonify({'error': 'Prompt not found'}), 404
-
-        # Find the prompt file
-        prompt_file = None
-        for root, dirs, files in os.walk(PROMPTS_DIR):
-            for file in files:
-                if file.endswith('.md'):
-                    file_path = os.path.join(root, file)
-                    relative_path = file_path.replace(
-                        '\\', '/').replace('prompts/', '')
-                    if relative_path == prompt_id or file_path == prompt_id:
-                        prompt_file = file_path
-                        break
-            if prompt_file:
-                break
 
         if not prompt_file:
+            # Debug logging
+            print(f"Prompt file not found for ID: {prompt_id}")
+            # List available files for debugging
+            available_files = list(PROMPTS_DIR.rglob('*.md'))
+            print(
+                f"Available files: {[str(f.relative_to(PROMPTS_DIR)) for f in available_files[:5]]}")
             return jsonify({'error': 'Prompt not found'}), 404
+
+        print(f"Found prompt file: {prompt_file}")  # Debug logging
 
         # Read and update the prompt file
         with open(prompt_file, 'r', encoding='utf-8') as f:
@@ -564,12 +558,20 @@ def toggle_favorite():
                     with open(prompt_file, 'w', encoding='utf-8') as f:
                         f.write(new_content)
 
+                    # Debug logging
+                    print(
+                        f"Updated favorite status to: {metadata['favorite']}")
+
+                    # Reload prompts to update the in-memory index
+                    prompt_manager.load_prompts()
+
                     return jsonify({
                         'status': 'success',
                         'is_favorite': metadata['favorite']
                     })
 
                 except yaml.YAMLError as e:
+                    print(f"YAML parsing error: {e}")  # Debug logging
                     return jsonify({'error': f'YAML parsing error: {str(e)}'}), 500
             else:
                 return jsonify({'error': 'Invalid file format'}), 400
@@ -585,13 +587,18 @@ def toggle_favorite():
             with open(prompt_file, 'w', encoding='utf-8') as f:
                 f.write(new_content)
 
+            # Reload prompts to update the in-memory index
+            prompt_manager.load_prompts()
+
             return jsonify({
                 'status': 'success',
                 'is_favorite': True
             })
 
     except Exception as e:
-        print(f"Error toggling favorite: {e}")
+        print(f"Error toggling favorite: {e}")  # Debug logging
+        import traceback
+        traceback.print_exc()  # Print full traceback for debugging
         return jsonify({'error': 'Failed to toggle favorite'}), 500
 
 

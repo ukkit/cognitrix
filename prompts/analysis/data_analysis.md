@@ -1,24 +1,24 @@
 ---
-title: Data Analysis Expert
+auto_categorized: '2025-06-05 19:20:42'
+categorization_confidence: 0.9
 category: analysis
-type: template
+created: 2025-01-12
+favorite: true
+last_modified: '2025-06-06'
+last_used: 2025-01-22
 tags:
 - analysis
 - data
 - insights
 - research
 - statistics
+title: Data Analysis Expert
+type: template
+use_count: 8
 variables:
 - analysis_goal
 - dataset_description
-favorite: false
-created: 2025-01-12
-last_used: 2025-01-22
-use_count: 8
-auto_categorized: '2025-06-05 19:20:42'
-categorization_confidence: 0.9
 ---
-
 Analyze the following dataset: {dataset_description}
 
 Analysis objective: {analysis_goal}
