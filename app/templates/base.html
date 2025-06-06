@@ -8,202 +8,203 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         /* Chat-o-llama consistent styling */
-        body { 
-            font-family: 'JetBrains Mono', 'Monaco', 'Menlo', 'Courier New', monospace; 
+        body {
+            font-family: 'JetBrains Mono', 'Monaco', 'Menlo', 'Courier New', monospace;
+            font-size: .9em;
             background-color: #0d1117;
             color: #f0f6fc;
         }
-        
+
         /* Dark theme cards */
         .card {
             background-color: #161b22;
             border: 1px solid #30363d;
             color: #f0f6fc;
         }
-        
+
         .card-header {
             background-color: #21262d;
             border-bottom: 1px solid #30363d;
             color: #f0f6fc;
         }
-        
+
         /* Prompt cards with hover effects */
-        .prompt-card { 
+        .prompt-card {
             transition: all 0.2s ease;
             background-color: #161b22;
             border: 1px solid #30363d;
         }
-        .prompt-card:hover { 
-            transform: translateY(-2px); 
+        .prompt-card:hover {
+            transform: translateY(-2px);
             box-shadow: 0 8px 25px rgba(139, 92, 246, 0.15);
             border-color: #8b5cf6;
         }
-        
+
         /* Category badges */
-        .category-badge { 
-            font-size: 0.75em;
+        .category-badge {
+            font-size: 0.60em;
             font-family: 'JetBrains Mono', monospace;
         }
-        
+
         /* Stats cards with purple gradient */
-        .stats-card { 
+        .stats-card {
             background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
             border: none;
             box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
         }
-        
+
         /* Navigation styling */
         .navbar {
             background-color: #21262d !important;
             border-bottom: 1px solid #30363d;
         }
-        
+
         .navbar-brand {
             font-weight: bold;
             font-size: 1.5rem;
             color: #8b5cf6 !important;
         }
-        
+
         .navbar-brand:hover {
             color: #a855f7 !important;
         }
-        
+
         /* Form controls */
         .form-control {
             background-color: #0d1117;
             border: 1px solid #30363d;
             color: #f0f6fc;
         }
-        
+
         .form-control:focus {
             background-color: #0d1117;
             border-color: #8b5cf6;
             box-shadow: 0 0 0 0.2rem rgba(139, 92, 246, 0.25);
             color: #f0f6fc;
         }
-        
+
         .form-control::placeholder {
             color: #7d8590;
         }
-        
+
         /* Buttons */
         .btn-primary {
             background-color: #8b5cf6;
             border-color: #8b5cf6;
         }
-        
+
         .btn-primary:hover {
             background-color: #7c3aed;
             border-color: #7c3aed;
         }
-        
+
         .btn-outline-primary {
             color: #8b5cf6;
             border-color: #8b5cf6;
         }
-        
+
         .btn-outline-primary:hover {
             background-color: #8b5cf6;
             border-color: #8b5cf6;
         }
-        
+
         .btn-success {
             background-color: #22c55e;
             border-color: #22c55e;
         }
-        
+
         .btn-outline-light {
             color: #f0f6fc;
             border-color: #30363d;
         }
-        
+
         .btn-outline-light:hover {
             background-color: #30363d;
             border-color: #30363d;
             color: #f0f6fc;
         }
-        
+
         /* List groups */
         .list-group-item {
             background-color: #161b22;
             border-color: #30363d;
             color: #f0f6fc;
         }
-        
+
         .list-group-item:hover {
             background-color: #21262d;
             color: #8b5cf6;
         }
-        
+
         .list-group-item-action:focus,
         .list-group-item-action:hover {
             background-color: #21262d;
             color: #8b5cf6;
         }
-        
+
         /* Badges */
         .badge {
             font-family: 'JetBrains Mono', monospace;
         }
-        
+
         .bg-primary {
             background-color: #8b5cf6 !important;
         }
-        
+
         .bg-secondary {
             background-color: #6b7280 !important;
         }
-        
+
         /* Pre code blocks */
         pre {
             background-color: #0d1117;
             border: 1px solid #30363d;
             border-radius: 8px;
             padding: 1rem;
-            font-size: 0.9em;
-            line-height: 1.5;
+            font-size: 0.75em;
+            line-height: 1.25;
             color: #f0f6fc;
             font-family: 'JetBrains Mono', monospace;
         }
-        
+
         /* Links */
         a {
             color: #8b5cf6;
         }
-        
+
         a:hover {
             color: #a855f7;
         }
-        
+
         .text-decoration-none:hover {
             color: #a855f7 !important;
         }
-        
+
         /* Alerts */
         .alert-info {
             background-color: #1e293b;
             border-color: #334155;
             color: #cbd5e1;
         }
-        
+
         /* Text colors */
         .text-muted {
             color: #7d8590 !important;
         }
-        
+
         /* Input groups */
         .input-group-text {
             background-color: #21262d;
             border-color: #30363d;
             color: #f0f6fc;
         }
-        
+
         /* Card footer */
         .card-footer {
             background-color: #0d1117;
             border-top: 1px solid #30363d;
         }
-        
+
         /* Responsive adjustments */
         @media (max-width: 768px) {
             .col-md-2 {
@@ -254,7 +255,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="col-md-10">
                 {% block main_content %}{% endblock %}
             </div>

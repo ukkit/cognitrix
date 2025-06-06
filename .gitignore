@@ -1,0 +1,271 @@
+# Cognitrix - Personal LLM Prompt Management System
+# .gitignore for auto-categorization and file management
+
+# ============================================================================
+# AUTO-CATEGORIZATION SYSTEM FILES
+# ============================================================================
+
+# Cache files from categorization system
+cache/
+data/
+data/categorization_cache.json
+data/category_confidence.json
+data/processing_log.jsonl
+
+# Local configuration files (may contain Ollama server details)
+config/local_categorization.json
+config/ollama_local.json
+categorization_config.json
+
+# Processing temporary files
+.categorization_temp/
+*.categorizing
+*.processing
+
+# Auto-generated category directories (optional - comment out if you want to track)
+# prompts/auto_*
+# prompts/temp_*
+
+# ============================================================================
+# CORE APPLICATION FILES
+# ============================================================================
+
+# Usage analytics and logs
+data/usage_log.jsonl
+data/analytics.json
+logs/
+*.log
+
+# User data and caches
+.cognitrix_cache/
+user_preferences.json
+recent_prompts.json
+
+# Virtual environment
+venv/
+env/
+.venv/
+.env/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# ============================================================================
+# DEVELOPMENT AND IDE FILES
+# ============================================================================
+
+# PyCharm
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Atom
+.atom/
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# Vim
+[._]*.s[a-v][a-z]
+[._]*.sw[a-p]
+[._]s[a-rt-v][a-z]
+[._]ss[a-gi-z]
+[._]sw[a-p]
+
+# ============================================================================
+# OPERATING SYSTEM FILES
+# ============================================================================
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msm
+*.msp
+*.lnk
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# ============================================================================
+# DOCKER AND DEPLOYMENT
+# ============================================================================
+
+# Docker
+.dockerignore
+docker-compose.override.yml
+.docker/
+
+# ============================================================================
+# BACKUP AND TEMPORARY FILES
+# ============================================================================
+
+# Backup files
+*.bak
+*.backup
+*.tmp
+*.temp
+.backup/
+backup/
+
+# Editor temporary files
+*.swp
+*.swo
+*~
+.#*
+.*.swp
+.*.swo
+
+# ============================================================================
+# SECURITY AND SENSITIVE DATA
+# ============================================================================
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# API keys and secrets
+secrets.json
+api_keys.json
+*.key
+*.pem
+*.p12
+*.pfx
+
+# ============================================================================
+# PROJECT-SPECIFIC EXCLUSIONS
+# ============================================================================
+
+# Large prompt collections (optional - uncomment if you have huge collections)
+# prompts/large_collections/
+# prompts/imported/
+# prompts/bulk_*/
+
+# Personal prompt folders (optional - protect your private prompts)
+# prompts/personal/
+# prompts/private/
+# prompts/confidential/
+
+# Test and example prompts (optional)
+# prompts/test/
+# prompts/examples/
+# prompts/sandbox/
+
+# ============================================================================
+# FORCE-INCLUDE IMPORTANT FILES
+# ============================================================================
+
+# Force include important scripts and configs even if patterns above match
+!scripts/categorize.py
+!scripts/setup_categorization.py
+!config/categorization_example.json
+!config/ollama_example.json
+!README.md
+!HOWTO.md
+!requirements.txt
+!app.py
+
+# Force include example prompt files
+!prompts/examples/coding-example.md
+!prompts/examples/writing-example.md
+!prompts/examples/analysis-example.md
+
+# ============================================================================
+# CLOUD AND SYNC EXCLUSIONS
+# ============================================================================
+
+# Git-specific
+.git/
+.gitattributes
+
+# GitHub-specific
+.github/workflows/secrets.yml
+
+# Cloud storage
+.dropbox
+.dropbox.attr
+.onedrive
+.icloud
+
+# ============================================================================
+# PERFORMANCE AND CACHE
+# ============================================================================
+
+# Flask
+instance/
+.webassets-cache
+
+# Pytest
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Node.js (if using any JS tools)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

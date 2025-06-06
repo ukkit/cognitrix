@@ -1,6 +1,9 @@
 {% extends "base.html" %}
 
+{% block page_title %}Dashboard - Cognitrix{% endblock %}
+
 {% block main_content %}
+<!-- Stats Cards -->
 <div class="row mb-4">
     <div class="col-md-4">
         <div class="card stats-card text-white">
@@ -28,63 +31,929 @@
     </div>
 </div>
 
-<div class="row">
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header">
-                <h5><i class="fas fa-clock me-2"></i>Recent Prompts</h5>
-            </div>
+<!-- Quick Actions -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card bg-dark text-light">
             <div class="card-body">
-                {% for prompt in recent %}
-                <div class="mb-3 p-2 border rounded prompt-card">
-                    <h6>
-                        <a href="/prompt/{{ prompt.id }}" class="text-decoration-none">
-                            {{ prompt.title }}
-                        </a>
-                        {% if prompt.favorite %}
-                        <i class="fas fa-star text-warning ms-2"></i>
-                        {% endif %}
-                    </h6>
-                    <p class="text-muted small mb-1">{{ prompt.content[:100] }}...</p>
-                    <div>
-                        <span class="badge bg-primary category-badge">{{ prompt.category }}</span>
-                        <small class="text-muted ms-2">Used {{ prompt.use_count }} times</small>
-                    </div>
+                <h5 class="card-title"><i class="fas fa-rocket me-2"></i>Quick Actions</h5>
+                <div class="d-flex gap-2 flex-wrap">
+                    <a href="/search" class="btn btn-outline-primary">
+                        <i class="fas fa-search me-1"></i>Search All Prompts
+                    </a>
+                    <a href="/category/coding" class="btn btn-outline-info">
+                        <i class="fas fa-code me-1"></i>Coding Prompts
+                    </a>
+                    <a href="/category/writing" class="btn btn-outline-success">
+                        <i class="fas fa-pen me-1"></i>Writing Prompts
+                    </a>
+                    <button class="btn btn-outline-warning" onclick="showFavoritesOnly()">
+                        <i class="fas fa-star me-1"></i>View Favorites
+                    </button>
+                    <button class="btn btn-outline-secondary" onclick="location.reload()">
+                        <i class="fas fa-sync me-1"></i>Refresh
+                    </button>
                 </div>
-                {% else %}
-                <p class="text-muted">No recent prompts found. Start using some prompts!</p>
-                {% endfor %}
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header">
-                <h5><i class="fas fa-star me-2"></i>Favorites</h5>
-            </div>
-            <div class="card-body">
-                {% for prompt in favorites %}
-                <div class="mb-3 p-2 border rounded prompt-card">
-                    <h6>
-                        <a href="/prompt/{{ prompt.id }}" class="text-decoration-none">
-                            {{ prompt.title }}
-                        </a>
-                        <i class="fas fa-star text-warning ms-2"></i>
-                    </h6>
-                    <p class="text-muted small mb-1">{{ prompt.content[:100] }}...</p>
-                    <div>
-                        <span class="badge bg-primary category-badge">{{ prompt.category }}</span>
-                        {% for tag in prompt.tags %}
-                        <span class="badge bg-secondary category-badge ms-1">{{ tag }}</span>
-                        {% endfor %}
-                    </div>
-                </div>
-                {% else %}
-                <p class="text-muted">No favorites yet. Star some prompts to see them here!</p>
-                {% endfor %}
             </div>
         </div>
     </div>
 </div>
+
+<!-- Main Content Grid -->
+<div class="row">
+    <!-- Recent Prompts -->
+    <div class="col-md-6">
+        <div class="card bg-dark text-light">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5><i class="fas fa-clock me-2"></i>Recent Prompts</h5>
+                <div class="d-flex gap-2">
+                    <small class="text-muted align-self-center">{{ recent|length }} prompts</small>
+                    <button class="btn btn-sm btn-outline-light" onclick="expandSection('recent')" id="expandRecentBtn">
+                        <i class="fas fa-expand-alt"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body" id="recentPromptsContainer">
+                {% for prompt in recent %}
+                <div class="mb-3 p-3 border rounded prompt-card text-light position-relative"
+                     data-prompt-id="{{ prompt.id }}"
+                     tabindex="0"
+                     data-title="{{ prompt.title or prompt.filename | lower }}"
+                     data-category="{{ prompt.category | lower }}"
+                     data-tags="{{ prompt.tags | join(',') | lower }}">
+
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h6 class="mb-0 flex-grow-1">
+                            <a href="/prompt/{{ prompt.id }}" class="text-decoration-none text-light prompt-title">
+                                {{ prompt.title or prompt.filename }}
+                            </a>
+                        </h6>
+                        <div class="d-flex gap-1 ms-2">
+                            <!-- Favorite button -->
+                            {% if prompt.favorite %}
+                            <button class="btn btn-sm btn-warning favorite-btn"
+                                    data-prompt-id="{{ prompt.id }}"
+                                    title="Remove from favorites">
+                                <i class="fas fa-star"></i>
+                            </button>
+                            {% else %}
+                            <button class="btn btn-sm btn-outline-warning favorite-btn"
+                                    data-prompt-id="{{ prompt.id }}"
+                                    title="Add to favorites">
+                                <i class="far fa-star"></i>
+                            </button>
+                            {% endif %}
+
+                            <!-- Copy button -->
+                            <button class="btn btn-sm btn-outline-light copy-btn"
+                                    data-content="{{ prompt.content | e }}"
+                                    data-prompt-id="{{ prompt.id }}"
+                                    title="Copy to clipboard">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Prompt preview -->
+                    <p class="text-light small mb-2 prompt-preview">
+                        {{ prompt.content[:120] }}{% if prompt.content|length > 120 %}...{% endif %}
+                    </p>
+
+                    <!-- Category and tags -->
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div>
+                            <span class="badge bg-primary category-badge">{{ prompt.category }}</span>
+                            {% if prompt.tags %}
+                                {% for tag in prompt.tags[:3] %}
+                                <span class="badge bg-secondary category-badge ms-1">{{ tag }}</span>
+                                {% endfor %}
+                                {% if prompt.tags|length > 3 %}
+                                <span class="badge bg-dark category-badge ms-1">+{{ prompt.tags|length - 3 }}</span>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                        <small class="text-light">
+                            Used {{ prompt.use_count or 0 }} times
+                            {% if prompt.last_used %} • {{ prompt.last_used }}{% endif %}
+                        </small>
+                    </div>
+
+                    <!-- Variables section (if templated prompt) -->
+                    {% if prompt.variables %}
+                    <div class="variables-section mt-2 collapse" id="vars-{{ loop.index }}">
+                        <small class="text-info d-block mb-2">
+                            <i class="fas fa-code"></i> Variables ({{ prompt.variables|length }}):
+                        </small>
+                        <div class="variables-container">
+                            {% for variable in prompt.variables %}
+                            <div class="mb-2">
+                                <label class="form-label text-light small">{{ variable }}:</label>
+                                <input type="text"
+                                    class="form-control form-control-sm bg-dark text-light variable-input"
+                                    data-variable="{{ variable }}"
+                                    placeholder="Enter {{ variable }}">
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <button class="btn btn-success btn-sm copy-with-vars-btn mt-2"
+                                data-content="{{ prompt.content | e }}"
+                                data-prompt-id="{{ prompt.id }}"
+                                title="Copy with variables substituted">
+                            <i class="fas fa-copy"></i> Copy with Variables
+                        </button>
+                    </div>
+
+                    <!-- Variables toggle button -->
+                    <button class="btn btn-sm btn-outline-info mt-2 variables-toggle"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#vars-{{ loop.index }}"
+                            title="Show/hide variables">
+                        <i class="fas fa-code"></i> Variables ({{ prompt.variables|length }})
+                    </button>
+                    {% endif %}
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-clock fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">No recent prompts found.</p>
+                    <p class="text-muted small">Start using some prompts to see them here!</p>
+                </div>
+                {% endfor %}
+            </div>
+
+            {% if recent|length > 0 %}
+            <div class="card-footer bg-transparent border-secondary">
+                <div class="d-flex justify-content-between">
+                    <small class="text-muted">Showing last {{ recent|length }} used prompts</small>
+                    <a href="/search?sort=recent" class="btn btn-sm btn-outline-primary">View All Recent</a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Favorites -->
+    <div class="col-md-6">
+        <div class="card bg-dark text-light">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5><i class="fas fa-star me-2"></i>Favorites</h5>
+                <div class="d-flex gap-2">
+                    <small class="text-muted align-self-center">{{ favorites|length }} prompts</small>
+                    <button class="btn btn-sm btn-outline-light" onclick="expandSection('favorites')" id="expandFavoritesBtn">
+                        <i class="fas fa-expand-alt"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body" id="favoritesContainer">
+                {% for prompt in favorites %}
+                <div class="mb-3 p-3 border rounded prompt-card text-light position-relative"
+                     data-prompt-id="{{ prompt.id }}"
+                     tabindex="0"
+                     data-title="{{ prompt.title or prompt.filename | lower }}"
+                     data-category="{{ prompt.category | lower }}"
+                     data-tags="{{ prompt.tags | join(',') | lower }}">
+
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h6 class="mb-0 flex-grow-1">
+                            <a href="/prompt/{{ prompt.id }}" class="text-decoration-none text-light prompt-title">
+                                {{ prompt.title or prompt.filename }}
+                            </a>
+                        </h6>
+                        <div class="d-flex gap-1 ms-2">
+                            <!-- Favorite button (always filled for favorites) -->
+                            <button class="btn btn-sm btn-warning favorite-btn"
+                                    data-prompt-id="{{ prompt.id }}"
+                                    title="Remove from favorites">
+                                <i class="fas fa-star"></i>
+                            </button>
+
+                            <!-- Copy button -->
+                            <button class="btn btn-sm btn-outline-light copy-btn"
+                                    data-content="{{ prompt.content | e }}"
+                                    data-prompt-id="{{ prompt.id }}"
+                                    title="Copy to clipboard">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Prompt preview -->
+                    <p class="text-light small mb-2 prompt-preview">
+                        {{ prompt.content[:120] }}{% if prompt.content|length > 120 %}...{% endif %}
+                    </p>
+
+                    <!-- Category and tags -->
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div>
+                            <span class="badge bg-primary category-badge">{{ prompt.category }}</span>
+                            {% if prompt.tags %}
+                                {% for tag in prompt.tags[:3] %}
+                                <span class="badge bg-secondary category-badge ms-1">{{ tag }}</span>
+                                {% endfor %}
+                                {% if prompt.tags|length > 3 %}
+                                <span class="badge bg-dark category-badge ms-1">+{{ prompt.tags|length - 3 }}</span>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                        <small class="text-light">
+                            Used {{ prompt.use_count or 0 }} times
+                            {% if prompt.last_used %} • {{ prompt.last_used }}{% endif %}
+                        </small>
+                    </div>
+
+                    <!-- Variables section (if templated prompt) -->
+                    {% if prompt.variables %}
+                    <div class="variables-section mt-2 collapse" id="fav-vars-{{ loop.index }}">
+                        <small class="text-info d-block mb-2">
+                            <i class="fas fa-code"></i> Variables ({{ prompt.variables|length }}):
+                        </small>
+                        <div class="variables-container">
+                            {% for variable in prompt.variables %}
+                            <div class="mb-2">
+                                <label class="form-label text-light small">{{ variable }}:</label>
+                                <input type="text"
+                                    class="form-control form-control-sm bg-dark text-light variable-input"
+                                    data-variable="{{ variable }}"
+                                    placeholder="Enter {{ variable }}">
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <button class="btn btn-success btn-sm copy-with-vars-btn mt-2"
+                                data-content="{{ prompt.content | e }}"
+                                data-prompt-id="{{ prompt.id }}"
+                                title="Copy with variables substituted">
+                            <i class="fas fa-copy"></i> Copy with Variables
+                        </button>
+                    </div>
+
+                    <!-- Variables toggle button -->
+                    <button class="btn btn-sm btn-outline-info mt-2 variables-toggle"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#fav-vars-{{ loop.index }}"
+                            title="Show/hide variables">
+                        <i class="fas fa-code"></i> Variables ({{ prompt.variables|length }})
+                    </button>
+                    {% endif %}
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-star fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">No favorites yet.</p>
+                    <p class="text-muted small">Star some prompts to see them here!</p>
+                    <a href="/search" class="btn btn-outline-primary btn-sm">Browse Prompts</a>
+                </div>
+                {% endfor %}
+            </div>
+
+            {% if favorites|length > 0 %}
+            <div class="card-footer bg-transparent border-secondary">
+                <div class="d-flex justify-content-between">
+                    <small class="text-muted">Showing all favorite prompts</small>
+                    <a href="/search?favorites=true" class="btn btn-sm btn-outline-warning">Manage Favorites</a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Categories Overview (Optional - only if categories available) -->
+{% if categories %}
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card bg-dark text-light">
+            <div class="card-header">
+                <h5><i class="fas fa-folder me-2"></i>Categories Overview</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for category, prompts_list in categories.items() %}
+                    <div class="col-md-3 col-sm-6 mb-3">
+                        <a href="/category/{{ category }}" class="text-decoration-none">
+                            <div class="category-card p-3 border rounded text-center h-100">
+                                <i class="fas fa-folder-open fa-2x mb-2 text-primary"></i>
+                                <h6 class="text-light">{{ category.title() }}</h6>
+                                <small class="text-muted">{{ prompts_list|length }} prompts</small>
+                            </div>
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<script>
+// Copy to clipboard function with visual feedback
+async function copyToClipboard(text, buttonElement) {
+    try {
+        // Use modern clipboard API
+        await navigator.clipboard.writeText(text);
+
+        // Visual feedback - change button text and style temporarily
+        const originalText = buttonElement.innerHTML;
+        const originalClass = buttonElement.className;
+
+        buttonElement.innerHTML = '<i class="fas fa-check"></i> Copied!';
+        buttonElement.className = buttonElement.className.replace('btn-outline-light', 'btn-success');
+
+        // Reset button after 2 seconds
+        setTimeout(() => {
+            buttonElement.innerHTML = originalText;
+            buttonElement.className = originalClass;
+        }, 2000);
+
+    } catch (err) {
+        // Fallback for browsers that don't support clipboard API
+        fallbackCopyToClipboard(text, buttonElement);
+    }
+}
+
+// Fallback copy method for older browsers
+function fallbackCopyToClipboard(text, buttonElement) {
+    // Create temporary textarea element
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    textArea.style.position = 'fixed';
+    textArea.style.left = '-999999px';
+    textArea.style.top = '-999999px';
+    document.body.appendChild(textArea);
+
+    try {
+        textArea.focus();
+        textArea.select();
+        document.execCommand('copy');
+
+        // Visual feedback
+        const originalText = buttonElement.innerHTML;
+        const originalClass = buttonElement.className;
+
+        buttonElement.innerHTML = '<i class="fas fa-check"></i> Copied!';
+        buttonElement.className = buttonElement.className.replace('btn-outline-light', 'btn-success');
+
+        setTimeout(() => {
+            buttonElement.innerHTML = originalText;
+            buttonElement.className = originalClass;
+        }, 2000);
+
+    } catch (err) {
+        console.error('Copy failed:', err);
+
+        // Show error feedback
+        const originalText = buttonElement.innerHTML;
+        buttonElement.innerHTML = '<i class="fas fa-times"></i> Failed';
+        buttonElement.className = buttonElement.className.replace('btn-outline-light', 'btn-danger');
+
+        setTimeout(() => {
+            buttonElement.innerHTML = originalText;
+            buttonElement.className = buttonElement.className.replace('btn-danger', 'btn-outline-light');
+        }, 2000);
+    } finally {
+        document.body.removeChild(textArea);
+    }
+}
+
+// Copy prompt content (handles both simple and templated prompts)
+function copyPromptContent(promptContent, variables = {}) {
+    // Replace variables in templated prompts
+    let processedContent = promptContent;
+
+    if (Object.keys(variables).length > 0) {
+        // Replace {variable} placeholders with actual values
+        for (const [key, value] of Object.entries(variables)) {
+            const placeholder = `{${key}}`;
+            processedContent = processedContent.replace(new RegExp(placeholder, 'g'), value);
+        }
+    }
+
+    return processedContent;
+}
+
+// Expand section functionality
+function expandSection(section) {
+    const container = section === 'recent' ? 'recentPromptsContainer' : 'favoritesContainer';
+    const button = section === 'recent' ? 'expandRecentBtn' : 'expandFavoritesBtn';
+
+    const containerEl = document.getElementById(container);
+    const buttonEl = document.getElementById(button);
+
+    if (containerEl.style.maxHeight && containerEl.style.maxHeight !== 'none') {
+        // Collapse
+        containerEl.style.maxHeight = '';
+        containerEl.style.overflowY = '';
+        buttonEl.innerHTML = '<i class="fas fa-expand-alt"></i>';
+        buttonEl.title = 'Expand section';
+    } else {
+        // Expand
+        containerEl.style.maxHeight = '600px';
+        containerEl.style.overflowY = 'auto';
+        buttonEl.innerHTML = '<i class="fas fa-compress-alt"></i>';
+        buttonEl.title = 'Collapse section';
+    }
+}
+
+// Show favorites only
+function showFavoritesOnly() {
+    const allCards = document.querySelectorAll('.prompt-card');
+    const showingFavs = document.body.classList.contains('favorites-only');
+
+    if (showingFavs) {
+        // Show all
+        allCards.forEach(card => card.style.display = 'block');
+        document.body.classList.remove('favorites-only');
+    } else {
+        // Show only favorites
+        allCards.forEach(card => {
+            const favBtn = card.querySelector('.favorite-btn');
+            const isFavorite = favBtn && favBtn.classList.contains('btn-warning');
+            card.style.display = isFavorite ? 'block' : 'none';
+        });
+        document.body.classList.add('favorites-only');
+    }
+}
+
+// Event listeners
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize clipboard functionality
+    if (!navigator.clipboard && !document.queryCommandSupported('copy')) {
+        console.warn('Clipboard functionality not supported in this browser');
+        // Hide copy buttons or show warning
+        document.querySelectorAll('.copy-btn, .copy-with-vars-btn').forEach(btn => {
+            btn.style.display = 'none';
+        });
+    }
+
+    // Handle copy buttons on prompt cards
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('copy-btn') || e.target.closest('.copy-btn')) {
+            e.preventDefault();
+
+            const button = e.target.classList.contains('copy-btn') ? e.target : e.target.closest('.copy-btn');
+            const promptContent = button.getAttribute('data-content');
+
+            if (promptContent) {
+                copyToClipboard(promptContent, button);
+
+                // Track usage analytics
+                trackPromptUsage(button.getAttribute('data-prompt-id'));
+            }
+        }
+
+        // Handle copy with variables button
+        if (e.target.classList.contains('copy-with-vars-btn') || e.target.closest('.copy-with-vars-btn')) {
+            e.preventDefault();
+
+            const button = e.target.classList.contains('copy-with-vars-btn') ? e.target : e.target.closest('.copy-with-vars-btn');
+            const promptContent = button.getAttribute('data-content');
+            const variableInputs = button.closest('.prompt-card').querySelectorAll('.variable-input');
+
+            // Collect variable values
+            const variables = {};
+            variableInputs.forEach(input => {
+                const varName = input.getAttribute('data-variable');
+                variables[varName] = input.value || `{${varName}}`;
+            });
+
+            const processedContent = copyPromptContent(promptContent, variables);
+            copyToClipboard(processedContent, button);
+
+            // Track usage analytics
+            trackPromptUsage(button.getAttribute('data-prompt-id'));
+        }
+
+        // Handle favorite button clicks
+        if (e.target.closest('.favorite-btn')) {
+            e.preventDefault();
+            const button = e.target.closest('.favorite-btn');
+            const promptId = button.getAttribute('data-prompt-id');
+            toggleFavorite(promptId, button);
+        }
+    });
+
+    // Auto-expand prompt cards on focus
+    document.querySelectorAll('.prompt-card').forEach(card => {
+        card.addEventListener('focus', function() {
+            this.style.transform = 'scale(1.02)';
+            this.style.transition = 'transform 0.2s ease';
+            this.classList.add('prompt-card-focused');
+        });
+
+        card.addEventListener('blur', function() {
+            this.style.transform = 'scale(1)';
+            this.classList.remove('prompt-card-focused');
+        });
+    });
+
+    // Auto-save variable inputs
+    document.addEventListener('input', function(e) {
+        if (e.target.classList.contains('variable-input')) {
+            const promptId = e.target.closest('.prompt-card').getAttribute('data-prompt-id');
+            const variableName = e.target.getAttribute('data-variable');
+            const value = e.target.value;
+
+            // Save to localStorage for session persistence
+            const storageKey = `cognitrix_vars_${promptId}`;
+            let savedVars = {};
+            try {
+                savedVars = JSON.parse(localStorage.getItem(storageKey) || '{}');
+            } catch (e) {
+                savedVars = {};
+            }
+
+            savedVars[variableName] = value;
+            localStorage.setItem(storageKey, JSON.stringify(savedVars));
+        }
+    });
+
+    // Restore saved variable values on page load
+    document.querySelectorAll('.prompt-card').forEach(card => {
+        const promptId = card.getAttribute('data-prompt-id');
+        const storageKey = `cognitrix_vars_${promptId}`;
+
+        try {
+            const savedVars = JSON.parse(localStorage.getItem(storageKey) || '{}');
+
+            Object.keys(savedVars).forEach(varName => {
+                const input = card.querySelector(`[data-variable="${varName}"]`);
+                if (input && savedVars[varName]) {
+                    input.value = savedVars[varName];
+                }
+            });
+        } catch (e) {
+            // Ignore parsing errors
+        }
+    });
+});
+
+// Toggle favorite status
+async function toggleFavorite(promptId, buttonElement) {
+    try {
+        const response = await fetch('/api/toggle-favorite', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ prompt_id: promptId })
+        });
+
+        if (response.ok) {
+            const result = await response.json();
+
+            // Update button appearance
+            const icon = buttonElement.querySelector('i');
+            if (result.is_favorite) {
+                buttonElement.className = 'btn btn-sm btn-warning favorite-btn';
+                icon.className = 'fas fa-star';
+                buttonElement.title = 'Remove from favorites';
+            } else {
+                buttonElement.className = 'btn btn-sm btn-outline-warning favorite-btn';
+                icon.className = 'far fa-star';
+                buttonElement.title = 'Add to favorites';
+
+                // If we're in favorites-only mode and this was unfavorited, hide the card
+                if (document.body.classList.contains('favorites-only')) {
+                    buttonElement.closest('.prompt-card').style.display = 'none';
+                }
+            }
+        }
+    } catch (error) {
+        console.error('Failed to toggle favorite:', error);
+    }
+}
+
+// Keyboard shortcuts
+document.addEventListener('keydown', function(e) {
+    // Ctrl/Cmd + C on focused prompt card
+    if ((e.ctrlKey || e.metaKey) && e.key === 'c') {
+        const focusedCard = document.querySelector('.prompt-card:focus');
+        if (focusedCard) {
+            e.preventDefault();
+            const copyBtn = focusedCard.querySelector('.copy-btn, .copy-with-vars-btn');
+            if (copyBtn) {
+                copyBtn.click();
+            }
+        }
+    }
+
+    // Arrow key navigation between prompt cards
+    if (e.key === 'ArrowRight' || e.key === 'ArrowLeft' || e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        const focusedCard = document.querySelector('.prompt-card:focus');
+        if (focusedCard) {
+            e.preventDefault();
+            const cards = Array.from(document.querySelectorAll('.prompt-card:visible'));
+            const currentIndex = cards.indexOf(focusedCard);
+            let nextIndex;
+
+            if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+                nextIndex = (currentIndex + 1) % cards.length;
+            } else {
+                nextIndex = currentIndex === 0 ? cards.length - 1 : currentIndex - 1;
+            }
+
+            if (cards[nextIndex]) {
+                cards[nextIndex].focus();
+            }
+        }
+    }
+
+    // Enter to view prompt details
+    if (e.key === 'Enter') {
+        const focusedCard = document.querySelector('.prompt-card:focus');
+        if (focusedCard) {
+            const viewBtn = focusedCard.querySelector('a[href^="/prompt/"]');
+            if (viewBtn) {
+                viewBtn.click();
+            }
+        }
+    }
+
+    // F key to toggle favorite
+    if (e.key === 'f' || e.key === 'F') {
+        const focusedCard = document.querySelector('.prompt-card:focus');
+        if (focusedCard) {
+            e.preventDefault();
+            const favoriteBtn = focusedCard.querySelector('.favorite-btn');
+            if (favoriteBtn) {
+                favoriteBtn.click();
+            }
+        }
+    }
+
+    // S key to search
+    if (e.key === 's' || e.key === 'S') {
+        if (!e.target.matches('input, textarea')) {
+            e.preventDefault();
+            window.location.href = '/search';
+        }
+    }
+});
+
+// Optional: Track prompt usage for analytics
+function trackPromptUsage(promptId) {
+    if (!promptId) return;
+
+    // Send usage data to backend
+    fetch('/api/track-usage', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            prompt_id: promptId,
+            action: 'copy',
+            timestamp: new Date().toISOString()
+        })
+    }).catch(err => {
+        console.log('Usage tracking failed:', err);
+        // Don't show error to user - this is non-critical
+    });
+}
+</script>
+
+<!-- CSS for enhanced dashboard -->
+<style>
+/* Stats cards */
+.stats-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    transition: transform 0.2s ease;
+}
+
+.stats-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+}
+
+/* Prompt cards */
+.prompt-card {
+    transition: all 0.2s ease;
+    border: 1px solid #495057 !important;
+    cursor: pointer;
+}
+
+.prompt-card:hover {
+    border-color: #6c757d !important;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+
+.prompt-card:focus {
+    outline: 2px solid #0d6efd;
+    outline-offset: 2px;
+    border-color: #0d6efd !important;
+}
+
+.prompt-card-focused {
+    transform: scale(1.02);
+    border-color: #0d6efd !important;
+}
+
+/* Variable inputs */
+.variable-input {
+    font-size: 0.8rem;
+    border: 1px solid #495057;
+}
+
+.variable-input:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+/* Copy buttons */
+.copy-btn, .copy-with-vars-btn {
+    transition: all 0.2s ease;
+}
+
+.copy-btn:hover, .copy-with-vars-btn:hover {
+    transform: translateY(-1px);
+}
+
+/* Variables section */
+.variables-section {
+    background: rgba(255,255,255,0.05);
+    border-radius: 0.375rem;
+    padding: 0.75rem;
+    border-left: 3px solid #17a2b8;
+}
+
+/* Prompt preview */
+.prompt-preview {
+    font-family: 'Courier New', monospace;
+    font-size: 0.8rem;
+    line-height: 1.4;
+}
+
+/* Badge styling */
+.badge {
+    font-size: 0.7rem;
+}
+
+.category-badge {
+    font-size: 0.65rem;
+}
+
+/* Category cards */
+.category-card {
+    transition: all 0.2s ease;
+    border: 1px solid #495057 !important;
+}
+
+.category-card:hover {
+    border-color: #0d6efd !important;
+    background-color: rgba(13, 110, 253, 0.1) !important;
+    transform: translateY(-2px);
+}
+
+/* Quick actions */
+.btn-outline-primary:hover,
+.btn-outline-info:hover,
+.btn-outline-success:hover,
+.btn-outline-warning:hover,
+.btn-outline-secondary:hover {
+    transform: translateY(-1px);
+}
+
+/* Loading states */
+.copy-btn:disabled, .copy-with-vars-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .prompt-card .d-flex {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .copy-with-vars-btn, .copy-btn {
+        width: 100%;
+    }
+
+    .variables-container .mb-2 {
+        margin-bottom: 0.5rem !important;
+    }
+
+    .stats-card {
+        margin-bottom: 1rem;
+    }
+
+    .category-card {
+        margin-bottom: 1rem;
+    }
+}
+
+/* Animation for successful copy */
+@keyframes copySuccess {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.copy-success {
+    animation: copySuccess 0.3s ease;
+}
+
+/* Empty state styling */
+.text-center i.fa-3x {
+    opacity: 0.5;
+}
+
+/* Expand/collapse functionality */
+#recentPromptsContainer,
+#favoritesContainer {
+    transition: max-height 0.3s ease;
+}
+
+/* Variables toggle button */
+.variables-toggle {
+    font-size: 0.75rem;
+}
+
+/* Favorites-only mode */
+body.favorites-only .prompt-card {
+    transition: opacity 0.3s ease;
+}
+
+/* Hover effects for interactive elements */
+.prompt-title:hover {
+    color: #0d6efd !important;
+    text-decoration: underline !important;
+}
+
+/* Card spacing improvements */
+.card-body {
+    padding: 1.25rem;
+}
+
+.card-header {
+    padding: 0.75rem 1.25rem;
+    border-bottom: 1px solid #495057;
+}
+
+.card-footer {
+    padding: 0.75rem 1.25rem;
+    border-top: 1px solid #495057;
+}
+
+/* Focus indicators for accessibility */
+.btn:focus,
+.form-control:focus {
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+/* Custom scrollbar for expanded sections */
+#recentPromptsContainer::-webkit-scrollbar,
+#favoritesContainer::-webkit-scrollbar {
+    width: 8px;
+}
+
+#recentPromptsContainer::-webkit-scrollbar-track,
+#favoritesContainer::-webkit-scrollbar-track {
+    background: #343a40;
+    border-radius: 4px;
+}
+
+#recentPromptsContainer::-webkit-scrollbar-thumb,
+#favoritesContainer::-webkit-scrollbar-thumb {
+    background: #6c757d;
+    border-radius: 4px;
+}
+
+#recentPromptsContainer::-webkit-scrollbar-thumb:hover,
+#favoritesContainer::-webkit-scrollbar-thumb:hover {
+    background: #adb5bd;
+}
+
+/* Smooth transitions for all interactive elements */
+* {
+    transition-duration: 0.2s;
+    transition-timing-function: ease;
+}
+
+.prompt-card {
+    background-color: #3a3a3a !important; /* Consistent dark gray */
+    color: #ffffff !important; /* White text */
+}
+
+/* Print styles */
+@media print {
+    .btn, .card-footer, .card-header .d-flex .btn {
+        display: none !important;
+    }
+
+    .prompt-card {
+        border: 1px solid #000 !important;
+        margin-bottom: 1rem;
+        break-inside: avoid;
+    }
+
+    .stats-card {
+        border: 1px solid #000 !important;
+        color: #000 !important;
+    }
+}
+</style>
+
 {% endblock %}
