@@ -1,53 +1,9 @@
 # Cognitrix - Personal LLM Prompt Management System
-# .gitignore for auto-categorization and file management
+# .gitignore file
 
 # ============================================================================
-# AUTO-CATEGORIZATION SYSTEM FILES
+# Python Files
 # ============================================================================
-
-# Cache files from categorization system
-cache/
-data/
-data/categorization_cache.json
-data/category_confidence.json
-data/processing_log.jsonl
-
-# Local configuration files (may contain Ollama server details)
-config/local_categorization.json
-config/ollama_local.json
-categorization_config.json
-
-# Processing temporary files
-.categorization_temp/
-*.categorizing
-*.processing
-
-# Auto-generated category directories (optional - comment out if you want to track)
-# prompts/auto_*
-# prompts/temp_*
-
-# ============================================================================
-# CORE APPLICATION FILES
-# ============================================================================
-
-# Usage analytics and logs
-data/usage_log.jsonl
-data/analytics.json
-logs/
-*.log
-
-# User data and caches
-.cognitrix_cache/
-user_preferences.json
-recent_prompts.json
-
-# Virtual environment
-venv/
-env/
-.venv/
-.env/
-
-# Python
 __pycache__/
 *.py[cod]
 *$py.class
@@ -65,57 +21,128 @@ parts/
 sdist/
 var/
 wheels/
+share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+MANIFEST
 
 # ============================================================================
-# DEVELOPMENT AND IDE FILES
+# Virtual Environment
 # ============================================================================
-
-# PyCharm
-.idea/
-*.iws
-*.iml
-*.ipr
-
-# VS Code
-.vscode/
-*.code-workspace
-
-# Sublime Text
-*.sublime-project
-*.sublime-workspace
-
-# Atom
-.atom/
-
-# Emacs
-*~
-\#*\#
-/.emacs.desktop
-/.emacs.desktop.lock
-*.elc
-auto-save-list
-tramp
-.\#*
-
-# Vim
-[._]*.s[a-v][a-z]
-[._]*.sw[a-p]
-[._]s[a-rt-v][a-z]
-[._]ss[a-gi-z]
-[._]sw[a-p]
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+.venv/
+cognitrix-env/
+cognitrix_env/
 
 # ============================================================================
-# OPERATING SYSTEM FILES
+# Auto-Categorization System Files
 # ============================================================================
+# Cache directory and files
+cache/
+*.cache
+categorization_cache.json
+/cache/categorization_cache.json
 
+# Auto-categorization logs
+categorization.log
+auto_categorize.log
+*.log
+
+# Temporary categorization files
+temp_categorization/
+.categorization_temp/
+
+# Model downloads and cache (if using local models)
+models/
+.ollama/
+ollama_cache/
+
+# Categorization backup files
+backup/categorization_backup_*.json
+prompts_backup_*/
+
+# ============================================================================
+# Configuration Files (Sensitive)
+# ============================================================================
+# Keep example configs, ignore actual configs with sensitive data
+config/config.json
+config/ollama.json
+config/personal_config.json
+config/*.local.json
+config/*.secret.json
+
+# Keep example/template configs
+!config/config.example.json
+!config/ollama.example.json
+!config/categorization_config.example.json
+
+# Environment files
+.env
+.env.local
+.env.production
+.env.staging
+.environment
+
+# ============================================================================
+# Data and Usage Tracking
+# ============================================================================
+# Usage analytics and tracking data
+data/
+usage_log.jsonl
+analytics/
+stats/
+user_data/
+
+# Personal prompt collections (if storing sensitive prompts)
+prompts/personal/
+prompts/private/
+prompts/work/
+prompts/confidential/
+
+# Keep example prompts and public categories
+!prompts/examples/
+!prompts/coding/example_*.md
+!prompts/writing/example_*.md
+
+# ============================================================================
+# Flask Application Files
+# ============================================================================
+# Flask session files
+flask_session/
+sessions/
+
+# Flask uploads
+uploads/
+static/uploads/
+
+# Flask cache
+.flask_cache/
+
+# Instance folder
+instance/
+
+# ============================================================================
+# Database Files (if used in future)
+# ============================================================================
+*.db
+*.sqlite
+*.sqlite3
+database/
+db/
+
+# ============================================================================
+# Operating System Files
+# ============================================================================
 # macOS
 .DS_Store
 .AppleDouble
 .LSOverride
-Icon
+Icon?
 ._*
 .DocumentRevisions-V100
 .fseventsd
@@ -124,19 +151,18 @@ Icon
 .Trashes
 .VolumeIcon.icns
 .com.apple.timemachine.donotpresent
-.AppleDB
-.AppleDesktop
-Network Trash Folder
-Temporary Items
-.apdisk
 
 # Windows
 Thumbs.db
+Thumbs.db:encryptable
 ehthumbs.db
-Desktop.ini
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
 $RECYCLE.BIN/
 *.cab
 *.msi
+*.msix
 *.msm
 *.msp
 *.lnk
@@ -149,123 +175,170 @@ $RECYCLE.BIN/
 .nfs*
 
 # ============================================================================
-# DOCKER AND DEPLOYMENT
+# IDE and Editor Files
 # ============================================================================
+# Visual Studio Code
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
 
-# Docker
-.dockerignore
-docker-compose.override.yml
-.docker/
+# PyCharm
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+.netrwhist
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
 
 # ============================================================================
-# BACKUP AND TEMPORARY FILES
+# Development and Testing Files
 # ============================================================================
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+
+# Jupyter Notebooks (if used for analysis)
+.ipynb_checkpoints
+
+# ============================================================================
+# Temporary and System Files
+# ============================================================================
+# Temporary files
+*.tmp
+*.temp
+temp/
+tmp/
+.tmp/
 
 # Backup files
 *.bak
 *.backup
-*.tmp
-*.temp
-.backup/
-backup/
-
-# Editor temporary files
-*.swp
-*.swo
 *~
-.#*
-.*.swp
-.*.swo
+*.orig
+
+# Lock files
+*.lock
+.lock
 
 # ============================================================================
-# SECURITY AND SENSITIVE DATA
+# Security and Authentication
 # ============================================================================
-
-# Environment variables
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
 # API keys and secrets
 secrets.json
 api_keys.json
-*.key
+.secrets/
+keys/
 *.pem
-*.p12
-*.pfx
+*.key
+*.cert
+*.crt
+
+# OAuth tokens
+.oauth_token
+token.json
 
 # ============================================================================
-# PROJECT-SPECIFIC EXCLUSIONS
+# Performance and Monitoring
 # ============================================================================
+# Profiling data
+*.prof
+.prof/
 
-# Large prompt collections (optional - uncomment if you have huge collections)
-# prompts/large_collections/
-# prompts/imported/
-# prompts/bulk_*/
-
-# Personal prompt folders (optional - protect your private prompts)
-# prompts/personal/
-# prompts/private/
-# prompts/confidential/
-
-# Test and example prompts (optional)
-# prompts/test/
-# prompts/examples/
-# prompts/sandbox/
+# Memory dumps
+*.hprof
+heapdump.*
 
 # ============================================================================
-# FORCE-INCLUDE IMPORTANT FILES
+# Cognitrix Specific Patterns
 # ============================================================================
+# Auto-generated prompt metadata backups
+prompts/**/*.md.bak
+prompts/**/*.md.orig
 
-# Force include important scripts and configs even if patterns above match
-!scripts/categorize.py
-!scripts/setup_categorization.py
-!config/categorization_example.json
-!config/ollama_example.json
+# Categorization working directories
+.categorizing/
+categorizing_*/
+
+# Export/import temporary files
+export/
+import/
+.export_temp/
+.import_temp/
+
+# Search index files (if implementing local search)
+search_index/
+.search_cache/
+index/
+
+# Ollama interaction logs
+ollama_requests.log
+llm_responses.log
+
+# Statistics and reporting files
+reports/
+.reports/
+statistics.json
+
+# User session data
+.user_sessions/
+session_data/
+
+# ============================================================================
+# Keep Important Files
+# ============================================================================
+# Always include these important files
 !README.md
-!HOWTO.md
 !requirements.txt
-!app.py
+!setup.py
+!pyproject.toml
+!Dockerfile
+!docker-compose.yml
+!.gitignore
+!LICENSE
+!CHANGELOG.md
 
-# Force include example prompt files
-!prompts/examples/coding-example.md
-!prompts/examples/writing-example.md
-!prompts/examples/analysis-example.md
+# Keep example configurations and documentation
+!config/README.md
+!prompts/README.md
+!docs/
+!examples/
 
-# ============================================================================
-# CLOUD AND SYNC EXCLUSIONS
-# ============================================================================
-
-# Git-specific
-.git/
-.gitattributes
-
-# GitHub-specific
-.github/workflows/secrets.yml
-
-# Cloud storage
-.dropbox
-.dropbox.attr
-.onedrive
-.icloud
+# Keep essential application files
+!app/
+!scripts/
+!categorizer.py
 
 # ============================================================================
-# PERFORMANCE AND CACHE
+# Custom User Patterns
 # ============================================================================
-
-# Flask
-instance/
-.webassets-cache
-
-# Pytest
-.pytest_cache/
-.coverage
-htmlcov/
-
-# Node.js (if using any JS tools)
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+# Add your personal patterns below this line
+# Example:
+# my_personal_prompts/
+# work_confidential/

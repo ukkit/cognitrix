@@ -130,8 +130,12 @@ def find_prompt_file(prompt_id):
 
 def get_template_context():
     """Get common template context for all routes"""
+    config = get_config()
     return {
-        'categories': dict(prompt_manager.categories)
+        'categories': dict(prompt_manager.categories),
+        'config': {
+            'ollama_enabled': config.get('features', {}).get('ollama_testing', False)
+        }
     }
 
 
@@ -704,37 +708,82 @@ def test_ollama():
         return jsonify({'error': 'Failed to test prompt'}), 500
 
 
-def get_ollama_config():
-    """Get Ollama configuration from config file or defaults"""
-    config_path = 'config/ollama.json'
+def get_config():
+    """Get unified configuration from config.json"""
+    config_path = Path('../config/config.json')
 
     default_config = {
-        'host': 'localhost',
-        'port': 11434,
-        'model': 'llama3.2:1b',
-        'timeout': 120,
-        'options': {
-            'temperature': 0.7,
-            'num_predict': 1024,
-            'num_ctx': 2048,
-            'top_k': 20,
-            'top_p': 0.8
+        "app": {
+            "debug": False,
+            "host": "0.0.0.0",
+            "port": 3001
+        },
+        "ollama": {
+            "host": "localhost",
+            "port": 11434,
+            "enabled": True,
+            "timeout": 30,
+            "default_model": "llama3.2:1b",
+            "model_options": {
+                "temperature": 0.7,
+                "num_predict": 1024,
+                "num_ctx": 2048,
+                "top_k": 20,
+                "top_p": 0.8
+            }
+        },
+        "testing": {
+            "enabled": True,
+            "model": "llama3.2:1b",
+            "max_response_length": 1024,
+            "response_timeout": 60
+        },
+        "features": {
+            "ollama_testing": True,
+            "usage_tracking": True,
+            "favorites": True
         }
     }
 
-    if os.path.exists(config_path):
+    if config_path.exists():
         try:
             with open(config_path, 'r', encoding='utf-8') as f:
                 config = json.load(f)
                 # Merge with defaults
-                for key, value in default_config.items():
-                    if key not in config:
-                        config[key] = value
+                for section, defaults in default_config.items():
+                    if section not in config:
+                        config[section] = defaults
+                    elif isinstance(defaults, dict):
+                        for key, value in defaults.items():
+                            if key not in config[section]:
+                                config[section][key] = value
                 return config
         except (json.JSONDecodeError, FileNotFoundError):
             pass
 
     return default_config
+
+
+def get_ollama_config():
+    """Get Ollama configuration from unified config file"""
+    config = get_config()
+    ollama_config = config.get('ollama', {})
+    testing_config = config.get('testing', {})
+
+    # Build Ollama-specific config for backward compatibility
+    return {
+        'host': ollama_config.get('host', 'localhost'),
+        'port': ollama_config.get('port', 11434),
+        'model': testing_config.get('model', ollama_config.get('default_model', 'llama3.2:1b')),
+        'timeout': testing_config.get('response_timeout', ollama_config.get('timeout', 120)),
+        'options': ollama_config.get('model_options', {
+            'temperature': 0.7,
+            'num_predict': 1024,
+            'num_ctx': 2048,
+            'top_k': 20,
+            'top_p': 0.8
+        })
+    }
 
 
 @app.route('/api/search-prompts')

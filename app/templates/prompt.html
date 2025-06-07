@@ -1,117 +1,672 @@
 {% extends "base.html" %}
 
-{% block page_title %}{{ prompt.title }} - Cognitrix{% endblock %}
+{% block page_title %}{{ prompt.title or prompt.filename }} - Cognitrix{% endblock %}
 
 {% block main_content %}
-<div class="card">
+<div class="card bg-dark text-light">
     <div class="card-header d-flex justify-content-between align-items-center">
-        <h4>
-            {{ prompt.title }}
+        <h4 class="mb-0">
+            {{ prompt.title or prompt.filename }}
             {% if prompt.favorite %}
             <i class="fas fa-star text-warning ms-2"></i>
             {% endif %}
         </h4>
-        <div>
-            <button class="btn btn-primary btn-sm" onclick="copyToClipboard()">
+        <div class="d-flex gap-2">
+            <!-- Favorite button -->
+            {% if prompt.favorite %}
+            <button class="btn btn-warning btn-sm favorite-btn"
+                    data-prompt-id="{{ prompt.id | e }}"
+                    title="Remove from favorites">
+                <i class="fas fa-star"></i>
+            </button>
+            {% else %}
+            <button class="btn btn-outline-warning btn-sm favorite-btn"
+                    data-prompt-id="{{ prompt.id | e }}"
+                    title="Add to favorites">
+                <i class="far fa-star"></i>
+            </button>
+            {% endif %}
+
+            <!-- Copy button -->
+            {% if prompt.variables %}
+            <button class="btn btn-success btn-sm copy-with-vars-btn"
+                    data-content="{{ prompt.content | e }}"
+                    data-prompt-id="{{ prompt.id | e }}"
+                    title="Copy with variables substituted">
+                <i class="fas fa-copy me-1"></i>Copy with Variables
+            </button>
+            {% else %}
+            <button class="btn btn-primary btn-sm copy-btn"
+                    data-content="{{ prompt.content | e }}"
+                    data-prompt-id="{{ prompt.id | e }}"
+                    title="Copy to clipboard">
                 <i class="fas fa-copy me-1"></i>Copy
             </button>
-            <button class="btn btn-success btn-sm" onclick="testWithOllama()" disabled>
-                <i class="fas fa-robot me-1"></i>Test (Phase 2)
+            {% endif %}
+
+            <!-- Test with Ollama button (Phase 2 feature) -->
+            {% if config and config.ollama_enabled %}
+            <button class="btn btn-outline-secondary btn-sm test-ollama-btn"
+                    data-prompt-id="{{ prompt.id | e }}"
+                    title="Test with Ollama">
+                <i class="fas fa-robot me-1"></i>Test
             </button>
+            {% endif %}
+
+            <!-- Back button -->
+            <a href="javascript:history.back()" class="btn btn-outline-light btn-sm" title="Go back">
+                <i class="fas fa-arrow-left me-1"></i>Back
+            </a>
         </div>
     </div>
+
     <div class="card-body">
+        <!-- Metadata row -->
         <div class="row mb-3">
             <div class="col-md-8">
-                <span class="badge bg-primary me-2">{{ prompt.category }}</span>
-                {% for tag in prompt.tags %}
-                <span class="badge bg-secondary me-1">{{ tag }}</span>
-                {% endfor %}
+                <span class="badge bg-primary me-2">{{ prompt.category or 'uncategorized' }}</span>
+                {% if prompt.tags %}
+                    {% for tag in prompt.tags %}
+                    <span class="badge bg-secondary me-1">{{ tag }}</span>
+                    {% endfor %}
+                {% endif %}
+                {% if prompt.type %}
+                <span class="badge bg-info ms-2">{{ prompt.type }}</span>
+                {% endif %}
             </div>
             <div class="col-md-4 text-end">
-                <small class="text-muted">Used {{ prompt.use_count }} times</small>
+                <small class="text-muted">
+                    Used {{ prompt.use_count or 0 }} times
+                    {% if prompt.last_used %} • Last: {{ prompt.last_used }}{% endif %}
+                </small>
             </div>
         </div>
 
+        <!-- Variables section (if templated prompt) -->
         {% if prompt.variables %}
-        <div class="alert alert-info">
-            <h6><i class="fas fa-edit me-2"></i>Variables</h6>
-            <form id="variableForm">
+        <div class="alert alert-info bg-dark border-info">
+            <h6 class="mb-3">
+                <i class="fas fa-code me-2"></i>Variables ({{ prompt.variables|length }})
+                <small class="text-muted ms-2">Fill in the variables below, then copy</small>
+            </h6>
+            <div class="variables-container" data-prompt-id="{{ prompt.id | e }}">
                 {% for var in prompt.variables %}
-                <div class="mb-2">
-                    <label class="form-label">{{ var.replace('_', ' ').title() }}</label>
-                    <textarea
-                        class="form-control form-control-sm bg-dark text-light variable-input"
-                        data-variable="{{ variable | e }}"
-                        placeholder="Enter {{ variable }}"
-                        rows="2"></textarea>
+                <div class="mb-3">
+                    <label class="form-label text-light">{{ var.replace('_', ' ').title() }}:</label>
+                    <textarea class="form-control form-control-sm bg-dark text-light variable-input border-secondary"
+                              data-variable="{{ var | e }}"
+                              placeholder="Enter {{ var.replace('_', ' ').lower() }}"
+                              rows="2"></textarea>
                 </div>
                 {% endfor %}
-                <button type="button" class="btn btn-sm btn-outline-primary" onclick="substituteVariables()">
-                    <i class="fas fa-magic me-1"></i>Substitute
+            </div>
+
+            <div class="d-flex gap-2 mt-3">
+                <button type="button" class="btn btn-outline-primary btn-sm" onclick="clearVariables()">
+                    <i class="fas fa-eraser me-1"></i>Clear All
                 </button>
-            </form>
+                <button type="button" class="btn btn-outline-success btn-sm" onclick="previewWithVariables()">
+                    <i class="fas fa-eye me-1"></i>Preview
+                </button>
+            </div>
         </div>
         {% endif %}
 
-        <div class="card">
-            <div class="card-header">
-                <h6>Prompt Content</h6>
+        <!-- Prompt content -->
+        <div class="card bg-secondary">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h6 class="mb-0">
+                    <i class="fas fa-file-alt me-2"></i>Prompt Content
+                </h6>
+                <button class="btn btn-sm btn-outline-light copy-content-btn"
+                        onclick="copyDisplayedContent()"
+                        title="Copy current content">
+                    <i class="fas fa-copy"></i>
+                </button>
             </div>
             <div class="card-body">
-                <pre id="promptContent" style="white-space: pre-wrap; font-family: inherit;">{{ prompt.content }}</pre>
+                <pre id="promptContent"
+                     class="mb-0 text-light bg-dark p-3 rounded border"
+                     style="white-space: pre-wrap; font-family: 'JetBrains Mono', monospace; font-size: 0.9em; line-height: 1.4; max-height: 400px; overflow-y: auto;">{{ prompt.content }}</pre>
             </div>
         </div>
 
-        <div class="row mt-3">
+        <!-- Metadata footer -->
+        <div class="row mt-4 pt-3 border-top border-secondary">
             <div class="col-md-6">
                 <small class="text-muted">
-                    <i class="fas fa-calendar me-1"></i>Created: {{ prompt.created }}
+                    <i class="fas fa-calendar me-1"></i>
+                    Created: {{ prompt.created or 'Unknown' }}
+                    {% if prompt.auto_categorized %}
+                    <br><i class="fas fa-robot me-1"></i>
+                    Auto-categorized: {{ prompt.auto_categorized }}
+                    {% if prompt.categorization_confidence %}
+                    ({{ (prompt.categorization_confidence * 100)|round }}% confidence)
+                    {% endif %}
+                    {% endif %}
                 </small>
             </div>
             <div class="col-md-6 text-end">
                 <small class="text-muted">
-                    <i class="fas fa-clock me-1"></i>Last used: {{ prompt.get('last_used', 'Never') }}
+                    <i class="fas fa-folder me-1"></i>
+                    File: {{ prompt.id }}
+                    {% if prompt.use_count %}
+                    <br><i class="fas fa-chart-bar me-1"></i>
+                    {{ prompt.use_count }} uses
+                    {% endif %}
                 </small>
             </div>
         </div>
     </div>
+
+    <!-- Footer with action buttons -->
+    <div class="card-footer bg-transparent border-secondary">
+        <div class="d-flex gap-2 flex-wrap">
+            <!-- Primary copy button -->
+            {% if prompt.variables %}
+            <button class="btn btn-success copy-with-vars-btn"
+                    data-content="{{ prompt.content | e }}"
+                    data-prompt-id="{{ prompt.id | e }}">
+                <i class="fas fa-copy me-1"></i>Copy with Variables
+            </button>
+            {% else %}
+            <button class="btn btn-success copy-btn"
+                    data-content="{{ prompt.content | e }}"
+                    data-prompt-id="{{ prompt.id | e }}">
+                <i class="fas fa-copy me-1"></i>Copy Prompt
+            </button>
+            {% endif %}
+
+            <!-- Category link -->
+            <a href="/category/{{ prompt.category or 'uncategorized' }}"
+               class="btn btn-outline-info">
+                <i class="fas fa-folder me-1"></i>View Category
+            </a>
+
+            <!-- Search similar -->
+            <a href="/search?q={{ prompt.tags[0] if prompt.tags else prompt.category }}"
+               class="btn btn-outline-secondary">
+                <i class="fas fa-search me-1"></i>Find Similar
+            </a>
+
+            <!-- Edit (future feature) -->
+            <button class="btn btn-outline-warning" disabled title="Edit functionality coming soon">
+                <i class="fas fa-edit me-1"></i>Edit
+            </button>
+        </div>
+    </div>
 </div>
 
+<!-- JavaScript for enhanced functionality -->
 <script>
-const originalPrompt = `{{ prompt.content }}`;
+// Global variables
+const originalPrompt = `{{ prompt.content | e }}`;
+const promptId = `{{ prompt.id | e }}`;
 
-function copyToClipboard() {
-    const content = document.getElementById('promptContent').textContent;
-    navigator.clipboard.writeText(content).then(() => {
-        const btn = event.target.closest('button');
-        const original = btn.innerHTML;
-        btn.innerHTML = '<i class="fas fa-check me-1"></i>Copied!';
-        btn.classList.replace('btn-primary', 'btn-success');
+// Copy to clipboard function with visual feedback (enhanced version)
+async function copyToClipboard(text, buttonElement) {
+    try {
+        await navigator.clipboard.writeText(text);
 
+        // Visual feedback
+        const originalText = buttonElement.innerHTML;
+        const originalClass = buttonElement.className;
+
+        buttonElement.innerHTML = '<i class="fas fa-check"></i> Copied!';
+        buttonElement.className = buttonElement.className.replace(/btn-outline-\w+|btn-primary|btn-success/, 'btn-success');
+
+        // Reset button after 2 seconds
         setTimeout(() => {
-            btn.innerHTML = original;
-            btn.classList.replace('btn-success', 'btn-primary');
+            buttonElement.innerHTML = originalText;
+            buttonElement.className = originalClass;
         }, 2000);
-    });
+
+    } catch (err) {
+        console.error('Copy failed:', err);
+        fallbackCopyToClipboard(text, buttonElement);
+    }
 }
 
-function substituteVariables() {
-    const form = document.getElementById('variableForm');
-    const formData = new FormData(form);
-    let content = originalPrompt;
+// Fallback copy method for older browsers
+function fallbackCopyToClipboard(text, buttonElement) {
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    textArea.style.position = 'fixed';
+    textArea.style.left = '-999999px';
+    textArea.style.top = '-999999px';
+    document.body.appendChild(textArea);
 
-    for (let [key, value] of formData.entries()) {
-        if (value.trim()) {
-            content = content.replace(new RegExp(`{${key}}`, 'g'), value);
+    try {
+        textArea.focus();
+        textArea.select();
+        document.execCommand('copy');
+
+        const originalText = buttonElement.innerHTML;
+        const originalClass = buttonElement.className;
+
+        buttonElement.innerHTML = '<i class="fas fa-check"></i> Copied!';
+        buttonElement.className = buttonElement.className.replace(/btn-outline-\w+|btn-primary/, 'btn-success');
+
+        setTimeout(() => {
+            buttonElement.innerHTML = originalText;
+            buttonElement.className = originalClass;
+        }, 2000);
+
+    } catch (err) {
+        console.error('Copy failed:', err);
+
+        const originalText = buttonElement.innerHTML;
+        buttonElement.innerHTML = '<i class="fas fa-times"></i> Failed';
+        buttonElement.className = buttonElement.className.replace(/btn-outline-\w+|btn-primary/, 'btn-danger');
+
+        setTimeout(() => {
+            buttonElement.innerHTML = originalText;
+            buttonElement.className = buttonElement.className.replace('btn-danger', 'btn-outline-light');
+        }, 2000);
+    } finally {
+        document.body.removeChild(textArea);
+    }
+}
+
+// Copy prompt content with variable substitution
+function copyPromptContent(promptContent, variables = {}) {
+    let processedContent = promptContent;
+
+    if (Object.keys(variables).length > 0) {
+        for (const [key, value] of Object.entries(variables)) {
+            const placeholder = `{${key}}`;
+            processedContent = processedContent.replace(new RegExp(placeholder, 'g'), value);
         }
     }
 
-    document.getElementById('promptContent').textContent = content;
+    return processedContent;
 }
 
-function testWithOllama() {
-    alert('Ollama integration coming in Phase 2!');
+// Get current variable values
+function getVariableValues() {
+    const variables = {};
+    const variableInputs = document.querySelectorAll('.variable-input');
+
+    variableInputs.forEach(input => {
+        const varName = input.getAttribute('data-variable');
+        const value = input.value.trim();
+        if (value) {
+            variables[varName] = value;
+        }
+    });
+
+    return variables;
 }
+
+// Substitute variables in the preview (GLOBAL FUNCTION)
+function previewWithVariables() {
+    console.log('Preview function called'); // Debug log
+    const variables = getVariableValues();
+    console.log('Variables collected:', variables); // Debug log
+
+    const processedContent = copyPromptContent(originalPrompt, variables);
+    console.log('Processed content:', processedContent.substring(0, 100) + '...'); // Debug log
+
+    const promptContentElement = document.getElementById('promptContent');
+    if (promptContentElement) {
+        promptContentElement.textContent = processedContent;
+        console.log('Content updated in DOM'); // Debug log
+    } else {
+        console.error('promptContent element not found');
+    }
+
+    // Update copy button to show it's using variables
+    const copyBtn = document.querySelector('.copy-with-vars-btn');
+    if (copyBtn && Object.keys(variables).length > 0) {
+        copyBtn.innerHTML = '<i class="fas fa-copy me-1"></i>Copy (with variables)';
+        copyBtn.classList.add('btn-info');
+        copyBtn.classList.remove('btn-success');
+    }
+}
+
+// Clear all variables (GLOBAL FUNCTION)
+function clearVariables() {
+    console.log('Clear function called'); // Debug log
+    const variableInputs = document.querySelectorAll('.variable-input');
+    variableInputs.forEach(input => {
+        input.value = '';
+    });
+
+    // Reset preview to original
+    const promptContentElement = document.getElementById('promptContent');
+    if (promptContentElement) {
+        promptContentElement.textContent = originalPrompt;
+        console.log('Content reset to original'); // Debug log
+    }
+
+    // Reset copy button
+    const copyBtn = document.querySelector('.copy-with-vars-btn');
+    if (copyBtn) {
+        copyBtn.innerHTML = '<i class="fas fa-copy me-1"></i>Copy with Variables';
+        copyBtn.classList.remove('btn-info');
+        copyBtn.classList.add('btn-success');
+    }
+}
+
+// Copy the currently displayed content
+function copyDisplayedContent() {
+    const content = document.getElementById('promptContent').textContent;
+    const button = event.target.closest('button');
+    copyToClipboard(content, button);
+    trackPromptUsage(promptId);
+}
+
+// Toggle favorite status
+async function toggleFavorite(promptId, buttonElement) {
+    try {
+        const response = await fetch('/api/toggle-favorite', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ prompt_id: promptId })
+        });
+
+        if (response.ok) {
+            const result = await response.json();
+
+            // Update button appearance
+            const icon = buttonElement.querySelector('i');
+            if (result.is_favorite) {
+                buttonElement.className = 'btn btn-warning btn-sm favorite-btn';
+                icon.className = 'fas fa-star';
+                buttonElement.title = 'Remove from favorites';
+            } else {
+                buttonElement.className = 'btn btn-outline-warning btn-sm favorite-btn';
+                icon.className = 'far fa-star';
+                buttonElement.title = 'Add to favorites';
+            }
+        }
+    } catch (error) {
+        console.error('Failed to toggle favorite:', error);
+    }
+}
+
+// Test with Ollama (Phase 2 feature)
+async function testWithOllama(promptId, buttonElement) {
+    const originalText = buttonElement.innerHTML;
+    buttonElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Testing...';
+    buttonElement.disabled = true;
+
+    try {
+        const variables = getVariableValues();
+
+        const response = await fetch('/api/test-ollama', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                prompt_id: promptId,
+                variables: variables
+            })
+        });
+
+        if (response.ok) {
+            const result = await response.json();
+            showOllamaResult(result);
+        } else {
+            throw new Error('Failed to test with Ollama');
+        }
+    } catch (error) {
+        console.error('Ollama test failed:', error);
+        buttonElement.innerHTML = '<i class="fas fa-times"></i> Failed';
+        buttonElement.className = buttonElement.className.replace('btn-outline-secondary', 'btn-danger');
+
+        setTimeout(() => {
+            buttonElement.innerHTML = originalText;
+            buttonElement.className = buttonElement.className.replace('btn-danger', 'btn-outline-secondary');
+        }, 3000);
+    } finally {
+        buttonElement.disabled = false;
+        if (buttonElement.innerHTML.includes('Testing...')) {
+            buttonElement.innerHTML = originalText;
+        }
+    }
+}
+
+// Show Ollama test result in modal
+function showOllamaResult(result) {
+    // Implementation would create a modal similar to other templates
+    alert(`Ollama Response:\n\n${result.response}`);
+}
+
+// Track prompt usage for analytics
+function trackPromptUsage(promptId) {
+    if (!promptId) return;
+
+    fetch('/api/track-usage', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            prompt_id: promptId,
+            action: 'copy',
+            timestamp: new Date().toISOString()
+        })
+    }).catch(err => {
+        console.log('Usage tracking failed:', err);
+    });
+}
+
+// Event listeners - Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded, initializing event listeners'); // Debug log
+
+    // Handle copy buttons
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('copy-btn') || e.target.closest('.copy-btn')) {
+            e.preventDefault();
+            console.log('Copy button clicked'); // Debug log
+            const button = e.target.classList.contains('copy-btn') ? e.target : e.target.closest('.copy-btn');
+            const promptContent = button.getAttribute('data-content');
+
+            if (promptContent) {
+                copyToClipboard(promptContent, button);
+                trackPromptUsage(button.getAttribute('data-prompt-id'));
+            }
+        }
+
+        // Handle copy with variables button
+        if (e.target.classList.contains('copy-with-vars-btn') || e.target.closest('.copy-with-vars-btn')) {
+            e.preventDefault();
+            console.log('Copy with variables button clicked'); // Debug log
+            const button = e.target.classList.contains('copy-with-vars-btn') ? e.target : e.target.closest('.copy-with-vars-btn');
+            const promptContent = button.getAttribute('data-content');
+            const variables = getVariableValues();
+
+            console.log('Variables for copy:', variables); // Debug log
+            const processedContent = copyPromptContent(promptContent, variables);
+            console.log('Processed content for copy:', processedContent.substring(0, 100) + '...'); // Debug log
+
+            copyToClipboard(processedContent, button);
+            trackPromptUsage(button.getAttribute('data-prompt-id'));
+        }
+
+        // Handle favorite button clicks
+        if (e.target.closest('.favorite-btn')) {
+            e.preventDefault();
+            const button = e.target.closest('.favorite-btn');
+            const promptId = button.getAttribute('data-prompt-id');
+            toggleFavorite(promptId, button);
+        }
+
+        // Handle test Ollama button
+        if (e.target.closest('.test-ollama-btn')) {
+            e.preventDefault();
+            const button = e.target.closest('.test-ollama-btn');
+            const promptId = button.getAttribute('data-prompt-id');
+            testWithOllama(promptId, button);
+        }
+    });
+
+    // Auto-save variable inputs to localStorage and auto-preview
+    document.addEventListener('input', function(e) {
+        if (e.target.classList.contains('variable-input')) {
+            const variableName = e.target.getAttribute('data-variable');
+            const value = e.target.value;
+
+            console.log(`Variable ${variableName} changed to:`, value); // Debug log
+
+            const storageKey = `cognitrix_vars_${promptId}`;
+            let savedVars = {};
+            try {
+                savedVars = JSON.parse(localStorage.getItem(storageKey) || '{}');
+            } catch (err) {
+                savedVars = {};
+            }
+
+            savedVars[variableName] = value;
+            localStorage.setItem(storageKey, JSON.stringify(savedVars));
+
+            // Auto-preview when any variable is changed
+            previewWithVariables();
+        }
+    });
+
+    // Restore saved variable values
+    const storageKey = `cognitrix_vars_${promptId}`;
+    try {
+        const savedVars = JSON.parse(localStorage.getItem(storageKey) || '{}');
+
+        Object.keys(savedVars).forEach(varName => {
+            const input = document.querySelector(`[data-variable="${varName}"]`);
+            if (input && savedVars[varName]) {
+                input.value = savedVars[varName];
+                console.log(`Restored variable ${varName}:`, savedVars[varName]); // Debug log
+            }
+        });
+
+        // If any variables were restored, show preview
+        if (Object.keys(savedVars).length > 0 && Object.values(savedVars).some(v => v.trim())) {
+            previewWithVariables();
+        }
+    } catch (e) {
+        console.error('Error restoring variables:', e);
+    }
+});
+
+// Keyboard shortcuts
+document.addEventListener('keydown', function(e) {
+    // Ctrl/Cmd + C to copy
+    if ((e.ctrlKey || e.metaKey) && e.key === 'c' && !e.target.matches('input, textarea')) {
+        e.preventDefault();
+        const copyBtn = document.querySelector('.copy-btn, .copy-with-vars-btn');
+        if (copyBtn) {
+            copyBtn.click();
+        }
+    }
+
+    // Ctrl/Cmd + Enter to preview variables
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        e.preventDefault();
+        previewWithVariables();
+    }
+
+    // Escape to clear variables
+    if (e.key === 'Escape') {
+        clearVariables();
+    }
+
+    // F key to toggle favorite
+    if (e.key === 'f' && !e.target.matches('input, textarea')) {
+        e.preventDefault();
+        const favoriteBtn = document.querySelector('.favorite-btn');
+        if (favoriteBtn) {
+            favoriteBtn.click();
+        }
+    }
+});
 </script>
+
+<!-- Enhanced styling -->
+<style>
+.variable-input {
+    resize: vertical;
+    min-height: 38px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+}
+
+.variable-input:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+#promptContent {
+    transition: all 0.3s ease;
+}
+
+.variables-container {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.variables-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.variables-container::-webkit-scrollbar-track {
+    background: #343a40;
+    border-radius: 4px;
+}
+
+.variables-container::-webkit-scrollbar-thumb {
+    background: #6c757d;
+    border-radius: 4px;
+}
+
+.copy-content-btn:hover {
+    transform: translateY(-1px);
+}
+
+.btn {
+    transition: all 0.2s ease;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+@media (max-width: 768px) {
+    .card-header .d-flex {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .card-footer .d-flex {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .btn {
+        width: 100%;
+    }
+}
+
+/* Print styles */
+@media print {
+    .btn, .card-footer, .card-header .d-flex .btn {
+        display: none !important;
+    }
+
+    .alert {
+        border: 1px solid #000 !important;
+        color: #000 !important;
+    }
+
+    #promptContent {
+        border: 1px solid #000 !important;
+        color: #000 !important;
+        background: white !important;
+    }
+}
+</style>
+
 {% endblock %}

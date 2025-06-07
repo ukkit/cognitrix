@@ -1,0 +1,102 @@
+{
+  "app": {
+    "name": "Cognitrix",
+    "version": "1.0.0",
+    "debug": false,
+    "host": "0.0.0.0",
+    "port": 3001
+  },
+  "ollama": {
+    "host": "localhost",
+    "port": 11434,
+    "enabled": true,
+    "timeout": 30,
+    "connect_timeout": 10,
+    "default_model": "llama3.2:1b",
+    "fallback_models": [
+      "llama3.2:3b",
+      "llama3.1:8b",
+      "mistral:7b"
+    ],
+    "model_options": {
+      "temperature": 0.1,
+      "num_predict": 50,
+      "num_ctx": 2048,
+      "top_p": 0.9,
+      "top_k": 40,
+      "repeat_penalty": 1.1,
+      "seed": -1
+    }
+  },
+  "categorization": {
+    "enabled": true,
+    "model": "llama3.2:1b",
+    "confidence_threshold": 0.7,
+    "use_llm_categorization": true,
+    "use_keyword_fallback": true,
+    "auto_approve_high_confidence": true,
+    "batch_size": 10,
+    "max_retries": 3,
+    "retry_delay": 5,
+    "system_prompt": "You are an expert at categorizing text prompts. Analyze the prompt and respond with only the most appropriate category name from the provided list. Be precise and consider the primary purpose of the prompt.",
+    "categories": {
+      "coding": ["code", "programming", "python", "javascript", "debug", "function", "api", "database", "sql", "html", "css", "react", "nodejs"],
+      "writing": ["write", "essay", "article", "blog", "story", "content", "copy", "creative", "draft", "edit", "proofread", "grammar"],
+      "analysis": ["analyze", "compare", "evaluate", "research", "data", "report", "study", "examine", "investigate", "assess"],
+      "business": ["business", "strategy", "marketing", "sales", "plan", "proposal", "meeting", "project", "management", "finance"],
+      "education": ["explain", "teach", "learn", "tutorial", "lesson", "study", "homework", "course", "training", "educational"],
+      "creative": ["creative", "idea", "brainstorm", "design", "art", "music", "poem", "story", "innovative", "imagination"],
+      "technical": ["technical", "system", "architecture", "documentation", "specification", "engineering", "infrastructure", "deployment"],
+      "communication": ["email", "message", "letter", "communication", "response", "reply", "conversation", "chat", "social"],
+      "productivity": ["organize", "schedule", "plan", "todo", "task", "workflow", "automation", "efficiency", "time", "management"]
+    }
+  },
+  "testing": {
+    "enabled": true,
+    "model": "llama3.2:1b",
+    "max_response_length": 1024,
+    "response_timeout": 60,
+    "stream_responses": false,
+    "system_prompt": "You are a helpful AI assistant. Provide clear, accurate, and helpful responses to user queries."
+  },
+  "storage": {
+    "prompts_dir": "prompts",
+    "cache_dir": "cache",
+    "data_dir": "data",
+    "logs_dir": "logs"
+  },
+  "features": {
+    "auto_categorization": true,
+    "usage_tracking": true,
+    "favorites": true,
+    "search": true,
+    "git_sync": true,
+    "ollama_testing": true
+  },
+  "performance": {
+    "enable_caching": true,
+    "cache_ttl": 3600,
+    "search_index_size": 10000,
+    "max_file_size": "10MB",
+    "concurrent_categorization": false
+  },
+  "logging": {
+    "level": "INFO",
+    "log_requests": true,
+    "log_responses": false,
+    "log_file": "logs/cognitrix.log",
+    "max_log_size": "50MB",
+    "backup_count": 5
+  },
+  "git": {
+    "auto_commit": false,
+    "auto_push": false,
+    "commit_message_template": "Auto-categorized prompts: {count} files updated",
+    "branch": "main"
+  },
+  "security": {
+    "allowed_file_types": [".md", ".txt"],
+    "max_prompt_size": 50000,
+    "sanitize_input": true
+  }
+}
